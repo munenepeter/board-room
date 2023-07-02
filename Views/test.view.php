@@ -8,8 +8,6 @@
     <!-- Sidebar -->
     <?php include_once 'sections/sidebar.view.php'; ?>
 
-
-
     <main class="bg-white p-4 md:ml-20 h-auto pt-20 flex justify-around">
         <style>
             [x-cloak] {
@@ -30,7 +28,6 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
                             </svg>
-
                         </div>
                         <p
                             class="py-2 flex items-center justify-start space-x-2 text-xs font-light leading-3 text-gray-500 dark:text-gray-300">
@@ -128,7 +125,7 @@
                             <template x-for="week in weeks">
                                 <tr>
                                     <template x-for="day in week">
-                                        <td :class="{'bg-blue-500 text-white border rounded-md hover:bg-blue-400': isToday(day) == true, 'border rounded-md hover:bg-gray-200': isToday(day) == false }" class="border rounded-md">
+                                        <td :class="{'bg-blue-500 text-white border rounded-md hover:bg-blue-400': isActive(day) == true, 'border rounded-md hover:bg-gray-200': isActive(day) == false }" class="border rounded-md">
                                             <div class="px-2 py-2 cursor-pointer flex w-full justify-center">
                                                 <p class="text-base text-gray-800 dark:text-gray-100 font-medium"
                                                     x-text="day">5</p>
