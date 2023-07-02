@@ -4,7 +4,7 @@ include_once 'sections/admin-nav.view.php';
 
 $all = implode(",", $logs);
 ?>
-<div class="bg-gray-100 m-4 rounded-md">
+<div class="bg-gray-100 m-2 rounded-md">
 
     <!-- btns & search -->
     <div class="w-full p-4">
@@ -52,7 +52,7 @@ $all = implode(",", $logs);
                 </form>
             </div>
         </div>
-        <div class="overflow-y-auto relative shadow-md sm:rounded-lg" style="height: 580px ;">
+        <div class="overflow-y-auto relative shadow-md sm:rounded-lg" style="height: 430px ;">
             <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400 " x-data="{selected:null}">
                 <thead class=" sticky top-0 text-xs text-gray-700  bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
@@ -71,12 +71,12 @@ $all = implode(",", $logs);
 
                     </tr>
                 </thead>
-                <tbody class="">
+                <tbody>
                     <?php $count = 0; ?>
                     <?php foreach ($logs as $log): ?>
                         <?php $log = json_decode($log); ?>
                         <tr @click="selected !== <?= $count; ?> ? selected = <?= $count; ?> : selected = null"
-                            class="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
+                            class="bg-white hover:bg-gray-50 border-b dark:bg-gray-900 dark:border-gray-700">
                             <th scope="row" class="py-3 px-2 md:px-6 flex items-center">
                                 <?php if ($log->level === "Error"): ?>
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -128,7 +128,16 @@ $all = implode(",", $logs);
 
                         </tr>
                         <tr x-show="selected == <?= $count; ?>">
-                            <td class="bg-green-100 border-b text-pink-550 p-2" colspan="4">
+
+                            <?php
+                                $classes = match ($log->level){
+                                    "Info" => "bg-green-50 border-b text-green-800 p-2",
+                                    "Debug" => "bg-blue-50 border-b text-blue-800 p-2",
+                                    "Error" => "bg-red-50 border-b text-red-800 p-2",
+                                    "Warning" => "bg-yellow-50 border-b text-yellow-800 p-2",
+                                }
+                           ?>
+                            <td class="<?=$classes?>" colspan="4">
                                 #
                                 <?= $count; ?><br>
                                 <b>*Message*</b> <i>

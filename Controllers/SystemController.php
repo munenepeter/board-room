@@ -59,7 +59,7 @@ class SystemController extends Controller
         //recreate the file
         $newLogFile = fopen($this->logFile, "w") or die("Unable to open file!");
 
-        logger("Info", "System: " . session_get('email') . " has deleted the logs");
+        logger("Info", "System: Logs have been deleted by ". session_get('email'));
 
         fclose($newLogFile);
 
