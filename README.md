@@ -1,2 +1,2 @@
-# dev-chungu
-A repo for the chungu devs
+# BoardRoom
+A repo for board room project

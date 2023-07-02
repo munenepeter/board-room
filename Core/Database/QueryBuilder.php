@@ -7,9 +7,11 @@ namespace BoardRoom\Core\Database;
  * @package QueryBuilder
  * 
  * Class that interacts with the db
- * @return Object Model returns an instance of Model class
+ * @return \BoardRoom\Models\Model Model returns an instance of Model class
  * 
  * @todo Implement App::get('database')->select('users')->where(['email', $email]);
+ * 
+ * @author Chungu Developers <developers@chungu.co.ke>
  */
 
 class QueryBuilder {
@@ -32,7 +34,7 @@ class QueryBuilder {
     } catch (\Exception $e) {
 
       logger("Error", '<b>' . $e->getMessage() . '</b>' . PHP_EOL . " $sql ");
-      throw new \Exception("Wrong query { $sql }!" . $e->getCode());
+      throw new \Exception("Wrong query <br> <pre>{$sql}</pre>" .PHP_EOL. $e->getCode());
     }
 
 
@@ -40,7 +42,7 @@ class QueryBuilder {
 
     if (is_null($results) || empty($results)) {
       if (str_contains($sql, "update") || str_contains($sql, "delete")) {
-        logger("Warning", "Empty results for: {$sql}");
+        logger("Warning", "Database: Empty results for:<br> <pre>{$sql}</pre>");
         return true;
       }
       return false;
@@ -52,11 +54,11 @@ class QueryBuilder {
    * selectAll
    * 
    * This selects everything from a given table
-   * @param String $table table from which to selct the data
+   * @param string $table table from which to selct the data
    * 
-   * @return Model returns an instance of Model with the same table name
+   * @return \BoardRoom\Models\Model returns an instance of Model with the same table name
    */
-  public function selectAll(String $table) {
+  public function selectAll(string $table) {
 
     $sql = "select * from {$table} ORDER BY `created_at` DESC;";
 
@@ -66,10 +68,10 @@ class QueryBuilder {
    * Select
    * Selects given values 
    * 
-   * @param String $table Table from which to select
-   * @param Array $values The columns in the db to select from
+   * @param string $table Table from which to select
+   * @param array $values The columns in the db to select from
    * 
-   * @return Model returns an instance of Model with the same table name
+   * @return \BoardRoom\Models\Model returns an instance of Model with the same table name
    */
   public function select(string $table, array $values) {
 
@@ -99,9 +101,9 @@ class QueryBuilder {
    * 
    * Selects given column names given a certain condition
    * 
-   * @param String $table Table from which to select
-   * @param Array $values The columns in the db to select from
-   * @param Array $condition The condition to be fulfiled by the where clause
+   * @param string $table Table from which to select
+   * @param array $values The columns in the db to select from
+   * @param array $condition The condition to be fulfiled by the where clause
    * 
    * @example 
    *  selectWhere('table_name", ['email', 'pass'], ['email','test@test.com']);
@@ -159,9 +161,9 @@ class QueryBuilder {
       logger("Info", '<b>' . ucfirst(auth()->username ?? "Someone") . '</b>' . " Inserted a new record to {$table} table ");
     } catch (\Exception $e) {
 
-      logger("Error", '<b>' . $e->getMessage() . '</b>' . PHP_EOL . " $sql ");
+      logger("Error", "Database: ". $e->getMessage() . ": <br> <pre>{$sql}</pre>");
 
-      throw new \Exception('Error with Query: ' . $e->getCode());
+      throw new \Exception("Database: Error with Query" . $e->getCode());
 
     }
   }
@@ -175,9 +177,9 @@ class QueryBuilder {
       return $statement->fetchAll(\PDO::FETCH_ASSOC);
     } catch (\Exception $e) {
 
-      logger("Error", " Wrong Query $sql, " . $e->getMessage());
+      logger("Error", "Database: ". $e->getMessage() . ": <br> <pre>{$sql}</pre>");
 
-      throw new \Exception('Wrong Query!' . $e->getCode());
+      throw new \Exception('Database: Wrong Query!' . $e->getCode());
      
     }
   }

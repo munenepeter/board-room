@@ -9,7 +9,6 @@ class Connection {
         try {
             if (is_dev()) {
                 //in dev mode
-                // return new \PDO("sqlite:" . Config::PATH_TO_SQLITE_FILE);
                 return new \PDO("sqlite:" . $config['path']);
             } else {
                 //in prod mode
