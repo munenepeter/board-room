@@ -1,0 +1,16 @@
+{
+    "name": "boardroom/boardroom",
+    "description": "A simple scheduling app for the boardroom",
+    "authors": [
+        {
+            "name": "munenepeter",
+            "email": "peternjega7@gmail.com"
+        }
+    ],
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "BoardRoom\\": "./"
+        }
+    }
+}
