@@ -88,7 +88,7 @@ function abort($message, $code) {
     } else {
         http_response_code($code);
     }
-    logger("Error", $message);
+    //logger("Error", "Exception: $message");
     view('error', [
         'code' => $code,
         'message' => $message
@@ -382,11 +382,14 @@ function time_ago($datetime, $full = false) {
  * @return string Path to the requested resource
  */
 function asset($dir) {
-    if(is_dev()){
-        echo BASE_URL.":".$_SERVER['SERVER_PORT']. "/static/$dir";
-    }else{
-        echo BASE_URL . "/static/$dir";
+    $baseUrl = BASE_URL;
+    $serverPort = $_SERVER['SERVER_PORT'] ?? '';
+
+    if (!empty($serverPort)) {
+        $baseUrl .= ':' . $serverPort;
     }
+
+    echo $baseUrl . "/static/$dir";
 }
 function get_perc($total, $number) {
     if ($total > 0) {
