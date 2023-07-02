@@ -1,9 +1,7 @@
 <?php
-//get routes edited to test workflow
-
-use BoardRoom\Core\Mantle\Router;
 
 $router->get('', 'PagesController@index');
+$router->get('test', 'AuthController@test');
 $router->get('login', 'AuthController@index');
 $router->post('auth/login', 'AuthController@login');
 $router->post('auth/logout', 'AuthController@signout');
