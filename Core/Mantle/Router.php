@@ -57,7 +57,8 @@ class Router {
         }
 
         if(empty($this->routes[$requestType][$regexUri])){
-            throw new \Exception("Oops, you forgot to include <b>". strtoupper($requestType)." /{$uri}</b>, There is no such route! ", 404);
+            logger("Error", "Router: There is no route to handle <b>". strtoupper($requestType)." /{$uri}</b>");
+            throw new \Exception("There is no route to handle <b>". strtoupper($requestType)." /{$uri}</b>", 404);
         }
         if (is_callable($this->routes[$requestType][$regexUri])) {
             $this->routes[$requestType][$regexUri](...$params);
@@ -69,7 +70,8 @@ class Router {
                     ...explode('@', $this->routes[$requestType][$regexUri])
                 );
             } elseif (!array_key_exists($uri, $this->routes[$requestType])) {
-                throw new \Exception("Oops, you forgot to include <b>". strtoupper($requestType)." /{$uri}</b>, There is no such route! ", 404);
+                logger("Error", "Router: There is no route to handle <b>". strtoupper($requestType)." /{$uri}</b> ");
+                throw new \Exception("There is no route to handle <b>". strtoupper($requestType)." /{$uri}</b>", 404);
             } else {
                 return $this->callAction(
                     $params,
@@ -84,6 +86,7 @@ class Router {
         $controller = "BoardRoom\\Controllers\\{$controller}";
 
         if (!class_exists($controller)) {
+            logger("Debug", "Router: Class $controller doesn't not exist!");
             throw new \Exception("Class <b>$controller</b> doesn't not exist!", 500);
         }
 
@@ -92,7 +95,7 @@ class Router {
         $name = get_class($controller);
 
         if (!method_exists($controller, $action)) {
-
+            logger("Debug", "Router: {$name} doesn't not respond to {$action} Method!");
             throw new \Exception("{$name} doesn't not respond to {$action} Method!", 500);
         }
 

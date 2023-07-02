@@ -88,7 +88,7 @@ $all = implode(",", $logs);
                                 <?= ENV; ?>
                             </td>
                             <td class="py-3 px-2 md:px-6">
-                                <?= $log->desc; ?>
+                               <?= strstr($log->desc, '<br>', true) !== false ? strstr($log->desc, '<br>', true) : $log->desc?>
                             </td>
 
                         </tr>

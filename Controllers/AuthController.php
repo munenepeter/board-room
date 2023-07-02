@@ -10,6 +10,11 @@ class AuthController extends Controller
 {
     public function index()
     {
+        if (Session::get('loggedIn')) {
+
+            return redirect('/');
+
+        }
         return view('login');
     }
 
