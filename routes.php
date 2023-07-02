@@ -15,7 +15,7 @@ $router->get('events', 'ApiController@allEvents');
 
 //logs
 $router->get(':system:/logs', 'SystemController@index');
-$router->get(':system:/logs/delete', 'SystemController@deleteLogs');
+$router->post(':system:/logs/delete', 'SystemController@deleteLogs');
 //robots
 $router->get('robots.txt', function (){
     return require __DIR__ ."/robots.txt";
