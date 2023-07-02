@@ -44,7 +44,7 @@ $all = implode(",", $logs);
                             placeholder="Search ..." required="">
                     </div>
                 </form>
-                <form action="/system/logs/delete" method="post">
+                <form action=":system:/logs/delete" method="post">
                     <input type="hidden" name="_delete_logs" value="<?= md5(session_get('email')) ?>">
                     <button type="button"
                         class="focus:outline-none text-white bg-red-400 hover:bg-red-500 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2 mr-2 mb-2 dark:focus:ring-red-900">Delete
