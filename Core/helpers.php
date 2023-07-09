@@ -463,6 +463,11 @@ function get_errors() {
    // Otherwise, return the time in the format "1hr 30mins".
    return sprintf("%dhrs %dmins", $hours, $minutes);
  }
+
+ function format_meeting_date(string $dateString) {
+    $timestamp = strtotime($dateString);
+    return date("F jS, Y \a\\t g:i A", $timestamp);
+  }
  
  
 

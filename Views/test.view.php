@@ -17,15 +17,26 @@
         <div class="max-w-xl dark:bg-gray-700 bg-white rounded-b">
             <div class="px-2">
                 <h1 class="text-xl mb-4 font-bold">Upcoming meetings</h1>
-
-            <?php
-            var_dump($meetings);
-            ?>
                 <?php foreach ($meetings as $meeting): ?>
                     <div class="border-b py-4 border-gray-400 border-dashed">
                         <div class="flex justify-between items-center">
                             <a tabindex="0"
-                                class="focus:outline-none text-lg font-medium leading-5 text-gray-700 dark:text-gray-100 mt-2"><?=$meeting->name?></a>
+                                class="focus:outline-none text-lg font-medium leading-5 text-gray-700 dark:text-gray-100 mt-2"><?= $meeting->name ?>
+                                . <span
+                                    class="
+                                    <?php
+                                     if(condition){
+echo ''
+                                    }elseif (condition) {
+                                        echo ''
+                                    }else{
+                                        echo ''
+                                    }
+
+                                    ?>
+                                    
+                                    bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300"><?= $meeting->type ?></span>
+                            </a>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor" class="w-6 h-6">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -38,8 +49,11 @@
                                 stroke="currentColor" class="w-4 h-4">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                            </svg> <span>July 10th, 2023 at 9:00 AM for <?=format_time_to_minutes($meeting->duration)?> | Booked by Mwaruguru on 27th June
-                                2023</span>
+                            </svg> <span><?= format_meeting_date($meeting->meeting_date) ?> for
+                                <?= format_time_to_minutes($meeting->duration) ?> | Booked by
+                                <?= ucwords(str_replace("_", " ", $meeting->owner)) ?> on
+                                <?= date("F jS, Y", strtotime($meeting->created_at)) ?>
+                            </span>
                         </p>
                         <p class="text-sm pt-2 leading-4 leading-none text-gray-600 dark:text-gray-300">Discussion on UX
                             sprint and Wireframe review</p>
@@ -128,7 +142,8 @@
                             <template x-for="week in weeks">
                                 <tr>
                                     <template x-for="day in week">
-                                        <td :class="{'bg-blue-500 text-white border rounded-md hover:bg-blue-400': isActive(day) == true, 'border rounded-md hover:bg-gray-200': isActive(day) == false }" class="border rounded-md">
+                                        <td :class="{'bg-blue-500 text-white border rounded-md hover:bg-blue-400': isActive(day) == true, 'border rounded-md hover:bg-gray-200': isActive(day) == false }"
+                                            class="border rounded-md">
                                             <div class="px-2 py-2 cursor-pointer flex w-full justify-center">
                                                 <p class="text-base text-gray-800 dark:text-gray-100 font-medium"
                                                     x-text="day">5</p>
