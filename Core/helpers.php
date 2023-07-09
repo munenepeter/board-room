@@ -444,22 +444,24 @@ function get_errors() {
  * "00:45:00"  to be 45 mins
  * "01:30:00"   to be 1hr 30mins
  */
-
-function format_time_to_minutes(string $time_string) {
-    // Get the minutes from the time string.
-    $minutes = (int)substr($time_string, 0, 2);
-  
-    // If the minutes are less than 60, just return them.
-    if ($minutes < 60) {
-      return $minutes;
-    }
-  
-    // Otherwise, return the time in the format "1hr 30mins".
-    $hours = $minutes / 60;
-    $minutes = $minutes % 60;
-  
-    return "$hours hrs $minutes mins";
-  }
+ function format_time_to_minutes($time_string) {
+   // Get the full time string.
+   $time = strtotime($time_string);
+ 
+   // Get the hours and minutes from the time string.
+   $hours = (int)date("H", $time);
+   $minutes = (int)date("i", $time);
+ 
+   // If the hours are 0 and the minutes are less than 60, just return them.
+   if ($hours === 0 && $minutes < 60) {
+     return strval($minutes) . "mins";
+   }
+ 
+   // Otherwise, return the time in the format "1hr 30mins".
+   return sprintf("%dhrs %dmins", $hours, $minutes);
+ }
+ 
+ 
 
 function is_dev() {
     if (ENV === 'development') {
