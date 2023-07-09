@@ -1,6 +1,7 @@
 <?php
 
 namespace BoardRoom\Controllers;
+use BoardRoom\Models\Meeting;
 
 class PagesController extends Controller {
 
@@ -12,7 +13,10 @@ class PagesController extends Controller {
         return view('index');
     }
     public function test() {
-        return view('test');
+        $meetings =  Meeting::all();
+        return view('test', [
+            'meetings' => $meetings
+        ]);
     }
  
 }
