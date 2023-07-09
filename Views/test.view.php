@@ -17,12 +17,15 @@
         <div class="max-w-xl dark:bg-gray-700 bg-white rounded-b">
             <div class="px-2">
                 <h1 class="text-xl mb-4 font-bold">Upcoming meetings</h1>
-                <?php for ($i = 0; $i < 3; $i++): ?>
+
+            <?php
+            var_dump($meetings);
+            ?>
+                <?php foreach ($meetings as $meeting): ?>
                     <div class="border-b py-4 border-gray-400 border-dashed">
                         <div class="flex justify-between items-center">
                             <a tabindex="0"
-                                class="focus:outline-none text-lg font-medium leading-5 text-gray-700 dark:text-gray-100 mt-2">Zoom
-                                call with the legal team</a>
+                                class="focus:outline-none text-lg font-medium leading-5 text-gray-700 dark:text-gray-100 mt-2"><?=$meeting->name?></a>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor" class="w-6 h-6">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -41,7 +44,7 @@
                         <p class="text-sm pt-2 leading-4 leading-none text-gray-600 dark:text-gray-300">Discussion on UX
                             sprint and Wireframe review</p>
                     </div>
-                <?php endfor; ?>
+                <?php endforeach; ?>
 
             </div>
         </div>
