@@ -456,6 +456,9 @@ function get_errors() {
    if ($hours === 0 && $minutes < 60) {
      return strval($minutes) . "mins";
    }
+   if($minutes === 0){
+    return strval($hours) . "hrs";
+   }
  
    // Otherwise, return the time in the format "1hr 30mins".
    return sprintf("%dhrs %dmins", $hours, $minutes);
