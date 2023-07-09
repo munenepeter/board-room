@@ -154,7 +154,7 @@
                                 <div class="flex">
                                     <div class="border-r border-gray-50 hover:border-t h-1/24 pb-2 w-1/12 -mr-4 -mt-1 text-sm text-gray-500" x-text="hour">
                                     </div>
-                                    <div class="bg-white border border-gray-100 w-10/12">
+                                    <div class="bg-white border border-gray-100 w-11/12">
                                         <div class="hover:bg-gray-100 border-b border-gray-100 h-10"></div>
                                         <div class="hover:bg-gray-100 border-b border-gray-100 h-10"></div>
                                     </div>
