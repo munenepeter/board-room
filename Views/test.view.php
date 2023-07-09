@@ -38,7 +38,7 @@
                                 stroke="currentColor" class="w-4 h-4">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                            </svg> <span>July 10th, 2023 at 9:00 AM for 30mins | Booked by Mwaruguru on 27th June
+                            </svg> <span>July 10th, 2023 at 9:00 AM for <?=format_time_to_minutes($meeting->duration)?> | Booked by Mwaruguru on 27th June
                                 2023</span>
                         </p>
                         <p class="text-sm pt-2 leading-4 leading-none text-gray-600 dark:text-gray-300">Discussion on UX

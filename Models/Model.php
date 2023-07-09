@@ -75,7 +75,7 @@ class Model {
      * @example 
      * Model::where(['id', 'name','slug'], ['id', 90]);
      * 
-     * @return BoardRoom\Models\Model;
+     * @return \BoardRoom\Models\Model;
      */
     public static function where($columns, $condition) {
         //Returns all the records in the db for a certain  model/table

@@ -436,6 +436,30 @@ function get_errors() {
     }
     return Request::$errors;
 }
+/**
+ * Format duration from db
+ * 
+ * @example 
+ * "00:30:00"  to be 30 mins
+ * "00:45:00"  to be 45 mins
+ * "01:30:00"   to be 1hr 30mins
+ */
+
+function format_time_to_minutes(string $time_string) {
+    // Get the minutes from the time string.
+    $minutes = (int)substr($time_string, 0, 2);
+  
+    // If the minutes are less than 60, just return them.
+    if ($minutes < 60) {
+      return $minutes;
+    }
+  
+    // Otherwise, return the time in the format "1hr 30mins".
+    $hours = $minutes / 60;
+    $minutes = $minutes % 60;
+  
+    return "$hours hrs $minutes mins";
+  }
 
 function is_dev() {
     if (ENV === 'development') {

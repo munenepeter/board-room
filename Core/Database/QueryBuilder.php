@@ -24,7 +24,7 @@ class QueryBuilder {
   }
 
 
-  public function runQuery($sql, $table) {
+  public function runQuery(string $sql, string $table) {
 
     $model = singularize(ucwords($table));
 
@@ -169,19 +169,29 @@ class QueryBuilder {
   }
   //Albtatry Query FROM table_name WHERE condition;
   public function query(string $sql) {
-    try {
 
+    list($childClass, $caller) = debug_backtrace(false, 2);
+
+    try {
       $statement = $this->pdo->prepare($sql);
       $statement->execute();
-
-      return $statement->fetchAll(\PDO::FETCH_ASSOC);
     } catch (\Exception $e) {
 
-      logger("Error", "Database: ". $e->getMessage() . ": <br> <pre>{$sql}</pre>");
-
-      throw new \Exception('Database: Wrong Query!' . $e->getCode());
-     
+      logger("Error", '<b>' . $e->getMessage() . '</b>' . PHP_EOL . " $sql ");
+      throw new \Exception("Wrong query <br> <pre>{$sql}</pre>" .PHP_EOL. $e->getCode());
     }
+   
+    $results = $statement->fetchAll(\PDO::FETCH_CLASS, $caller['class']);
+
+    if (is_null($results) || empty($results)) {
+      if (str_contains($sql, "update") || str_contains($sql, "delete")) {
+        logger("Warning", "Database: Empty results for:<br> <pre>{$sql}</pre>");
+        return true;
+      }
+      return false;
+      
+    }
+      return  $results;
   }
 
   //DELETE FROM table_name WHERE condition;
