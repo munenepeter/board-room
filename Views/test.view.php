@@ -25,17 +25,15 @@
                                 . <span
                                     class="
                                     <?php
-                                     if(condition){
-echo ''
-                                    }elseif (condition) {
-                                        echo ''
-                                    }else{
-                                        echo ''
+                                    if (strtolower($meeting->type) === "external"){
+                                        echo 'bg-yellow-100 text-yellow-800';
+                                    } elseif (strtolower($meeting->type) === "hybrid"){
+                                        echo 'bg-green-100 text-green-800';
+                                    } else{
+                                        echo 'bg-blue-100 text-blue-800';
                                     }
-
                                     ?>
-                                    
-                                    bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300"><?= $meeting->type ?></span>
+                                     text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300"><?= $meeting->type ?></span>
                             </a>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor" class="w-6 h-6">
@@ -49,7 +47,8 @@ echo ''
                                 stroke="currentColor" class="w-4 h-4">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                            </svg> <span><?= format_meeting_date($meeting->meeting_date) ?> for
+                            </svg> <span>
+                                <?= format_meeting_date($meeting->meeting_date) ?> for
                                 <?= format_time_to_minutes($meeting->duration) ?> | Booked by
                                 <?= ucwords(str_replace("_", " ", $meeting->owner)) ?> on
                                 <?= date("F jS, Y", strtotime($meeting->created_at)) ?>
