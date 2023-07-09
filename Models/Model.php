@@ -100,7 +100,7 @@ class Model {
      * 
      * Selects every where an id matches the one given
      * 
-     * @param Int $id the id of the column to be selected
+     * @param int $id the id of the column to be selected
      * 
      * @example 
      * <code>
@@ -108,7 +108,7 @@ class Model {
      * </code>
      * 
      * 
-     * @return BoardRoom\Models\Model;
+     * @return \BoardRoom\Models\Model;
      */
     public static function find($id) {
 
@@ -116,7 +116,6 @@ class Model {
         //User::find(1); return a user with the id of 1
         if (empty($item)) {
             throw new \Exception("There is no results for your query!", 404);
-            return;
         }
         return $item[0];
     }
