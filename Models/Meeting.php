@@ -7,9 +7,11 @@ use BoardRoom\Core\Mantle\App;
 use BoardRoom\Core\Database\Connection;
 
 
-class Meeting extends Model {
+class Meeting extends Model
+{
 
-    public static function all() {
+    public static function all()
+    {
         return App::get('database')->query(
             "SELECT meetings.id, employees.username as owner, meeting_types.type as type, meeting_details.name as name, meeting_details.duration as duration, meeting_details.meeting_date, meetings.created_at
         FROM meetings
@@ -20,40 +22,51 @@ class Meeting extends Model {
         );
     }
 
-    public static function create(array $meeting) {
+    public static function create(array $meeting)
+    {
+
+        $database = (is_dev()) ? App::get('config')['sqlite'] : App::get('config')['mysql'];
 
         $pdo = Connection::make($database);
 
         $pdo->beginTransaction();
 
-        try {
+        try
+        {
             // Insert data into meeting_details table
             $insertDetails = $pdo->prepare("INSERT INTO meeting_details (name, duration, meeting_date) VALUES (:name, :duration, :meeting_date)");
-            $insertDetails->execute(array(
-                ':name' => $meeting['name'],
-                ':duration' => $meeting['duration'],
-                ':meeting_date' => $meeting['date_time']
-            ));
+            $insertDetails->execute(
+                array(
+                    ':name' => $meeting['name'],
+                    ':duration' => $meeting['duration'],
+                    ':meeting_date' => $meeting['meeting_date']
+                )
+            );
 
             // Retrieve the last inserted ID from meeting_details table
             $lastInsertId = $pdo->lastInsertId();
 
             // Insert data into meetings table
             $insertMeeting = $pdo->prepare("INSERT INTO meetings (meeting_type_id, employee_no, meeting_details_id, created_at) VALUES (:meeting_type_id, :employee_no, :meeting_details_id, NOW())");
-            $insertMeeting->execute(array(
-                ':meeting_type_id' => $meeting['meeting_type'],
-                ':employee_no' => $meeting['employee_no'],
-                ':meeting_details_id' => $lastInsertId
-            ));
+            $insertMeeting->execute(
+                array(
+                    ':meeting_type_id' => $meeting['meeting_type'],
+                    ':employee_no' => $meeting['employee_no'],
+                    ':meeting_details_id' => $lastInsertId
+                )
+            );
 
             // Commit the transaction
             $pdo->commit();
 
-            echo "Data inserted successfully!";
-        } catch (\PDOException $e) {
+            return true;
+        } catch (\PDOException $e)
+        {
             // Rollback the transaction if any error occurred
             $pdo->rollback();
-            echo "Error: " . $e->getMessage();
+            logger("Error", "<b>Database: An error happened" . $e->getMessage());
+            return false;
+
         }
 
 
