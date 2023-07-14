@@ -1,7 +1,7 @@
 <?php
 
 $router->get('', 'PagesController@index');
-$router->get('test', 'PagesController@test');
+$router->get('overview', 'PagesController@overview');
 $router->get('login', 'AuthController@index');
 $router->post('auth/login', 'AuthController@login');
 $router->post('auth/logout', 'AuthController@signout');

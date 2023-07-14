@@ -12,9 +12,9 @@ class PagesController extends Controller {
     public function index() {
         return view('index');
     }
-    public function test() {
+    public function overview() {
         $meetings =  Meeting::all();
-        return view('test', [
+        return view('overview', [
             'meetings' => $meetings
         ]);
     }
