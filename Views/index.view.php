@@ -71,18 +71,6 @@
             word-wrap: break-word;
         }
 
-        .calendar .days .day_num .event.green {
-            background-color: #51ce57;
-        }
-
-        .calendar .days .day_num .event.blue {
-            background-color: #518fce;
-        }
-
-        .calendar .days .day_num .event.red {
-            background-color: #ce5151;
-        }
-
         .calendar .days .day_num:nth-child(7n+1) {
             border-left: 1px solid #e6e9ea;
         }
@@ -110,12 +98,12 @@
         <div class="container mx-auto p-2">
 
             <?php
-             $calendar = new \BoardRoom\Core\Calendar();
-             foreach ($meetings as $meeting) {
+            $calendar = new \BoardRoom\Core\Calendar();
+            foreach ($meetings as $meeting) {
                 $calendar->add_event($meeting->name, date('Y-m-d', strtotime($meeting->meeting_date)));
-             }
-            
-           
+            }
+
+
             echo $calendar;
             ?>
         </div>
