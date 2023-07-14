@@ -35,26 +35,22 @@ class Meeting extends Model
         {
             // Insert data into meeting_details table
             $insertDetails = $pdo->prepare("INSERT INTO meeting_details (name, duration, meeting_date) VALUES (:name, :duration, :meeting_date)");
-            $insertDetails->execute(
-                array(
-                    ':name' => $meeting['name'],
-                    ':duration' => $meeting['duration'],
-                    ':meeting_date' => $meeting['meeting_date']
-                )
-            );
+            $insertDetails->execute([
+                ':name' => $meeting['name'],
+                ':duration' => $meeting['duration'],
+                ':meeting_date' => $meeting['meeting_date']
+            ]);
 
             // Retrieve the last inserted ID from meeting_details table
             $lastInsertId = $pdo->lastInsertId();
 
             // Insert data into meetings table
             $insertMeeting = $pdo->prepare("INSERT INTO meetings (meeting_type_id, employee_no, meeting_details_id, created_at) VALUES (:meeting_type_id, :employee_no, :meeting_details_id, NOW())");
-            $insertMeeting->execute(
-                array(
-                    ':meeting_type_id' => $meeting['meeting_type'],
-                    ':employee_no' => $meeting['employee_no'],
-                    ':meeting_details_id' => $lastInsertId
-                )
-            );
+            $insertMeeting->execute([
+                ':meeting_type_id' => $meeting['meeting_type'],
+                ':employee_no' => $meeting['employee_no'],
+                ':meeting_details_id' => $lastInsertId
+            ]);
 
             // Commit the transaction
             $pdo->commit();
