@@ -9,7 +9,8 @@ use BoardRoom\Core\Mantle\Session;
 
 define("BASE_URL",  sprintf(
     "%s://%s",
-    isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http', $_SERVER['SERVER_NAME']
+    isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http',
+    $_SERVER['SERVER_NAME']
 ));
 
 /**
@@ -331,7 +332,7 @@ function url() {
             "%s://%s:%s%s",
             isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http',
             $_SERVER['SERVER_NAME'],
-             $_SERVER['SERVER_PORT'],
+            $_SERVER['SERVER_PORT'],
             $_SERVER['REQUEST_URI']
         );
     }
@@ -404,16 +405,15 @@ function logger(string $level, string $message) {
 }
 
 function request(string $key = "") {
-    if($key !== ""){
+    if ($key !== "") {
         return htmlspecialchars(trim($_REQUEST[$key])) ?? NULL;
     }
 
-    return new class{
-        public function all(){
+    return new class {
+        public function all() {
             return array_merge($_POST, $_GET);
         }
     };
-    
 }
 
 
@@ -444,32 +444,32 @@ function get_errors() {
  * "00:45:00"  to be 45 mins
  * "01:30:00"   to be 1hr 30mins
  */
- function format_time_to_minutes($time_string) {
-   // Get the full time string.
-   $time = strtotime($time_string);
- 
-   // Get the hours and minutes from the time string.
-   $hours = (int)date("H", $time);
-   $minutes = (int)date("i", $time);
- 
-   // If the hours are 0 and the minutes are less than 60, just return them.
-   if ($hours === 0 && $minutes < 60) {
-     return strval($minutes) . "mins";
-   }
-   if($minutes === 0){
-    return strval($hours) . "hrs";
-   }
- 
-   // Otherwise, return the time in the format "1hr 30mins".
-   return sprintf("%dhrs %dmins", $hours, $minutes);
- }
+function format_time_to_minutes($time_string) {
+    // Get the full time string.
+    $time = strtotime($time_string);
 
- function format_meeting_date(string $dateString) {
+    // Get the hours and minutes from the time string.
+    $hours = (int)date("H", $time);
+    $minutes = (int)date("i", $time);
+
+    // If the hours are 0 and the minutes are less than 60, just return them.
+    if ($hours === 0 && $minutes < 60) {
+        return strval($minutes) . "mins";
+    }
+    if ($minutes === 0) {
+        return strval($hours) . "hrs";
+    }
+
+    // Otherwise, return the time in the format "1hr 30mins".
+    return sprintf("%dhrs %dmins", $hours, $minutes);
+}
+
+function format_meeting_date(string $dateString) {
     $timestamp = strtotime($dateString);
     return date("F jS, Y \a\\t g:i A", $timestamp);
-  }
- 
- 
+}
+
+
 
 function is_dev() {
     if (ENV === 'development') {

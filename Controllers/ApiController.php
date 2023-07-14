@@ -13,15 +13,12 @@ use BoardRoom\Models\Meeting;
  *
  */
 
-class ApiController extends Controller
-{
-    public function __construct()
-    {
+class ApiController extends Controller {
+    public function __construct() {
         $this->middleware('auth');
     }
 
-    public function allMeetings()
-    {
+    public function allMeetings() {
         return $this->json(Meeting::all());
     }
 }

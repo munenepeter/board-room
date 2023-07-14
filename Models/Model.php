@@ -115,7 +115,7 @@ class Model {
         $item =  App::get('database')->selectAllWhereID(static::tableName(), $id);
         //User::find(1); return a user with the id of 1
         if (empty($item)) {
-            throw new \Exception("There is no results for your query!", 404);
+            throw new \Exception(message: "There is no results for your query!", code: 404);
         }
         return $item[0];
     }
