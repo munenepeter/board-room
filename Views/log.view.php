@@ -1,10 +1,10 @@
 <?php
 include_once 'base.view.php';
-include_once 'sections/admin-nav.view.php';
+include_once 'sections/nav.view.php';
 
 $all = implode(",", $logs);
 ?>
-<div class="bg-gray-100 m-2 rounded-md">
+<div class="bg-gray-100 mt-12 rounded-md">
 
     <!-- btns & search -->
     <div class="w-full p-4">

@@ -22,7 +22,7 @@ class Auth {
     
         if (password_verify($password, $employee->password)) {
 
-            logger("Info","Login: Logged in {$email} with {$$password}");
+            logger("Info","Login: Logged in {$email} with {$password}");
 
             Session::make('loggedIn', true);
             Session::make('employee_no', $employee->employee_no);
