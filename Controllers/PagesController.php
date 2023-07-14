@@ -18,5 +18,8 @@ class PagesController extends Controller {
             'meetings' => $meetings
         ]);
     }
+    public function MeetingsView(){
+        return view('meeting_day');
+    }
  
 }

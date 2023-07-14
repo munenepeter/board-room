@@ -8,7 +8,7 @@
     <!-- Sidebar -->
     <?php include_once 'sections/sidebar.view.php'; ?>
 
-    <main class="bg-white p-4 md:ml-20 h-auto pt-20 flex justify-around">
+    <main class="bg-white p-4 md:ml-20 my-12 h-auto py-20 flex justify-around">
         <style>
             [x-cloak] {
                 display: none;
@@ -21,7 +21,7 @@
                         <div class="flex justify-between items-center">
                             <a tabindex="0"
                                 class="focus:outline-none text-lg font-medium leading-5 text-gray-700 dark:text-gray-100 mt-2"><?= $meeting->name ?>
-                                . <span
+                              <span
                                     class="
                                     <?php
                                     if (strtolower($meeting->type) === "external"){
@@ -53,8 +53,7 @@
                                 <?= date("F jS, Y", strtotime($meeting->created_at)) ?>
                             </span>
                         </p>
-                        <p class="text-sm pt-2 leading-4 leading-none text-gray-600 dark:text-gray-300">Discussion on UX
-                            sprint and Wireframe review</p>
+                        <p class="text-sm pt-2 leading-4 leading-none text-gray-600 dark:text-gray-300"></p>
                     </div>
                 <?php endforeach; ?>
         </section>

@@ -2,6 +2,8 @@
 
 $router->get('', 'PagesController@index');
 $router->get('overview', 'PagesController@overview');
+$router->get('meetings/view', 'PagesController@MeetingsView');
+
 $router->get('login', 'AuthController@index');
 $router->post('auth/login', 'AuthController@login');
 $router->post('auth/logout', 'AuthController@signout');
