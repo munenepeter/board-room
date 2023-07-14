@@ -6,6 +6,7 @@ use BoardRoom\Core\Mantle\Auth;
 use BoardRoom\Core\Mantle\Logger;
 use BoardRoom\Core\Mantle\Request;
 use BoardRoom\Core\Mantle\Session;
+use BoardRoom\Core\Calendar;
 
 define("BASE_URL",  sprintf(
     "%s://%s",
@@ -112,6 +113,7 @@ function redirectback($data = []) {
 function request_uri() {
     return Request::uri();
 }
+
 
 function wp_strip_all_tags($string, $remove_breaks = false) {
     $string = preg_replace('@<(script|style)[^>]*?>.*?</\\1>@si', '', $string);

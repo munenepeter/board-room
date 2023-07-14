@@ -10,7 +10,10 @@ class PagesController extends Controller {
        }
 
     public function index() {
-        return view('index');
+        $meetings =  Meeting::all();
+        return view('index',[
+            'meetings' => $meetings
+        ]);
     }
     public function overview() {
         $meetings =  Meeting::all();
