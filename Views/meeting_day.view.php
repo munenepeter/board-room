@@ -17,8 +17,10 @@
 
         <nav x-data="calendar()" class="w-full rounded-md border-b mt-8">
             <div class="flex justify-between bg-gray-50 p-2">
-                <p><span class="font-semibold" x-text="`${getMonthName(month)}, ${year}`">January 22,
-                        2022</span><br><span class="text-sm text-gray-400">Saturday</span></p>
+                <?php
+                $date = $_GET['date'] ? date_create(urldecode($_GET['date'])) : date_create();
+                ?>
+                <p><span class="font-semibold"><?= date_format($date, "F j, Y") ?></span><br><span class="text-sm text-gray-400"><?= date_format($date, "l") ?></span></p>
                 <div class="flex items-center justify-end space-x-4">
                     <div class="text-center flex justify-between">
                         <button class="mr-2" x-on:click="previousMonth"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -111,7 +113,7 @@
 
         </nav>
 
-        <article class="w-full flex justify-around my-12 pb-6 p-2 border rounded-md">
+        <article class="w-full flex justify-around my-12 pb-6 p-2 border rounded-md shadow-sm">
             <section class="w-3/4 dark:bg-gray-700 bg-white rounded-b p-2">
                 <div class="overflow-y-auto max-h-[28rem]  w-full">
                     <div class="ml-1 flex flex-col">
