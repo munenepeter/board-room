@@ -29,8 +29,6 @@ $database = (is_dev()) ? App::get('config')['sqlite'] : App::get('config')['mysq
  *an instance of the connections
 */
 
-App::bind('database', new QueryBuilder(
-    Connection::make($database)
-));
+App::bind('database', new QueryBuilder(Connection::make($database)));
 
 

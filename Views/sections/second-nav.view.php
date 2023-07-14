@@ -54,18 +54,19 @@
                                 <div>
                                     <label for="event_type" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Event
                                         Type</label>
-                                    <select id="event_type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                    <select id="event_type" name="meeting_type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                         <option selected="">Select Event Type</option>
-                                        <option value="internal">Internal</option>
-                                        <option value="external">External</option>
-                                        <option value="hybrid">Hybrid</option>
-                                        <option value="other">Other</option>
+                                        <option value="1">Internal</option>
+                                        <option value="2">External</option>
+                                        <option value="3">Hybrid</option>
+                                        <option value="4">Other</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label for="start_time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Meeting Date & Time</label>
-                                    <input type="datetime-local" name="date_time" id="start_time" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="08:00" required="">
+                                    <input type="datetime-local" name="meeting_date" id="start_time" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="08:00" required="">
                                 </div>
+                                <input type="hidden" name="employee_no" value="<?=session_get('employee_no')?>">
                                 <div>
                                     <label for="duration" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Duration</label>
                                     <input type="text" name="duration" id="duration" required pattern="[0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]{2}" title="Write a duration in the format hh:mm:ss:ms" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="hh:mm:ss:ms">

@@ -194,6 +194,24 @@ class QueryBuilder {
       return  $results;
   }
 
+  public function queryInsert(string $sql){
+    try {
+
+      $statement = $this->pdo->prepare($sql);
+      if($statement->execute()){
+        logger("Info", '<b>' . ucfirst(auth()->username ?? "Someone") . '</b>' . " Inserted a new record to table ");
+      }else{
+        logger("Info", '<b>' . ucfirst(auth()->username ?? "Someone") . '</b>' . " something went wrong");
+
+      }
+    } catch (\Exception $e) {
+
+      logger("Error", "Database: " . $e->getMessage() . ": <br> <pre>{$sql}</pre>");
+
+      throw new \Exception("Database: Error with Query" . $e->getCode());
+    }
+  }
+
   //DELETE FROM table_name WHERE condition;
   public function join(string $table1, string $table2, $fk, $pk) {
 

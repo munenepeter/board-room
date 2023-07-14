@@ -2,6 +2,8 @@
 
 namespace BoardRoom\Controllers;
 
+use BoardRoom\Models\Meeting;
+
 class EventsController extends Controller {
 
     public function __construct() {
@@ -9,7 +11,8 @@ class EventsController extends Controller {
        }
 
     public function book() {
-        var_dump(request()->all());
+        $meeting = request()->all();
+        Meeting::create($meeting); 
     }
  
 }
