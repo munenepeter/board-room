@@ -20,7 +20,7 @@ class ApiController extends Controller
         $this->middleware('auth');
     }
 
-    public function allEvents()
+    public function allMeetings()
     {
         return $this->json(Meeting::all());
     }

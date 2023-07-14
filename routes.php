@@ -10,7 +10,7 @@ $router->post('auth/logout', 'AuthController@signout');
 
 $router->post('events/book', 'EventsController@book');
 
-$router->get('events', 'ApiController@allEvents');
+$router->get('api/v1/meetings', 'ApiController@allMeetings');
 
 
 

@@ -65,35 +65,6 @@ class Meeting extends Model
 
         }
 
-
-
-
-
-        // return App::get('database')->queryInsert(
-        //     "
-        //         START TRANSACTION;
-
-        //         INSERT INTO meeting_details (name, duration, meeting_date)
-        //         VALUES (
-        //             '" . $meeting['name'] . "', 
-        //             '" . $meeting['duration'] ."',
-        //             '" . $meeting['meeting_date'] ."'
-        //        );
-
-
-        //         SET @last_insert_id := LAST_INSERT_ID();
-
-
-        //         INSERT INTO meetings (meeting_type_id, employee_no, meeting_details_id, created_at)
-        //         VALUES (
-        //             '" . $meeting['meeting_type'] ."', 
-        //             '" . $meeting['employee_no'] . "', , 
-        //             @last_insert_id,
-        //             NOW()
-        //         );
-
-        //         COMMIT;
-        // "
-        // );
+       
     }
 }
