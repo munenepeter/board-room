@@ -2,19 +2,22 @@
     <div class="flex justify-between bg-gray-50 p-2">
         <?php
         $date = isset($_GET['date']) ? date_create(urldecode($_GET['date'])) : date_create();
+       
+        $month_later = clone $date;
+        
         ?>
         <p><span class="font-semibold"><?= date_format($date, "F j, Y") ?></span><br><span class="text-sm text-gray-400"><?= date_format($date, "l") ?></span></p>
         <div class="flex items-center justify-end space-x-4">
             <div class="text-center flex justify-between">
-                <button class="mr-2" x-on:click="previousMonth"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                <a href="?date=<?=urlencode(date_format($month_later->modify('-1 month'), 'Y-m-d'))?>" class="mr-2" x-on:click="previousMonth"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                     </svg>
-                </button>
-                <h2 class="text-md font-bold">Today</h2>
-                <button class="ml-2" x-on:click="nextMonth"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                </a>
+                <h2 class="text-md font-bold"><?= date_format($date, "F") ?></h2>
+                <a href="?date=<?=urlencode(date_format($month_later->modify('+2 month'), 'Y-m-d'))?>" class="ml-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                     </svg>
-                </button>
+                </a>
             </div>
             <span>|</span>
 
@@ -66,7 +69,7 @@
                                     <label for="start_time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Meeting Date & Time</label>
                                     <input type="datetime-local" name="meeting_date" id="start_time" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="08:00" required="">
                                 </div>
-                                <input type="hidden" name="employee_no" value="<?=session_get('employee_no')?>">
+                                <input type="hidden" name="employee_no" value="<?= session_get('employee_no') ?>">
                                 <div>
                                     <label for="duration" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Duration</label>
                                     <input type="text" name="duration" id="duration" required pattern="[0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]{2}" title="Write a duration in the format hh:mm:ss:ms" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="hh:mm:ss:ms">

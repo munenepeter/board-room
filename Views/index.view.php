@@ -28,10 +28,9 @@
         .calendar .days .day_name {
             width: calc(100% / 7);
             border-right: 1px solid #2c7aca;
-            padding: 20px;
+            padding: 18px;
             text-transform: uppercase;
-            font-size: 12px;
-            font-weight: bold;
+            font-size: 10px;
             color: #818589;
             color: #fff;
             background-color: #518fce;
@@ -48,28 +47,27 @@
             border-right: 1px solid #e6e9ea;
             border-bottom: 1px solid #e6e9ea;
             padding: 15px;
-            font-weight: bold;
             color: #7c878d;
             cursor: pointer;
-            min-height: 100px;
+            min-height: 90px;
         }
 
         .calendar .days .day_num span {
             display: inline-flex;
             width: 30px;
-            font-size: 14px;
+            font-size: 12px;
         }
 
-        .calendar .days .day_num .event {
+        /* .calendar .days .day_num .event {
             margin-top: 10px;
             font-weight: 500;
-            font-size: 14px;
+            font-size: 10px;
             padding: 3px 6px;
             border-radius: 4px;
             background-color: #f7c30d;
             color: #fff;
             word-wrap: break-word;
-        }
+        } */
 
         .calendar .days .day_num:nth-child(7n+1) {
             border-left: 1px solid #e6e9ea;
@@ -91,19 +89,17 @@
         }
     </style>
     <main class="bg-white pt-4 ml-32 my-2">
-
-
         <?php include_once 'sections/second-nav.view.php'; ?>
-
-        <div class="container mx-auto p-2">
-
+        <div class="container mx-auto px-1">
             <?php
+
             $calendar = new \BoardRoom\Core\Calendar();
+
             foreach ($meetings as $meeting) {
-                $calendar->add_event($meeting->name, date('Y-m-d', strtotime($meeting->meeting_date)));
+                $txt = "<p class=\"text-sm text-white\">{$meeting->name}  .  <span class=\"text-xs\">{$meeting->type}</span></p>
+                        <p class=\"text-xs text-white\">".format_time_to_minutes($meeting->duration) ."</p>";
+                $calendar->add_event($txt, date('Y-m-d', strtotime($meeting->meeting_date)));
             }
-
-
             echo $calendar;
             ?>
         </div>

@@ -8,13 +8,13 @@ class Calendar {
     private $active_year, $active_month, $active_day;
     private $events = [];
 
-    public function __construct($date = null) {
+    public function __construct(string $date = null) {
         $this->active_year = $date != null ? date('Y', strtotime($date)) : date('Y');
         $this->active_month = $date != null ? date('m', strtotime($date)) : date('m');
         $this->active_day = $date != null ? date('d', strtotime($date)) : date('d');
     }
 
-    public function add_event($txt, $date, $days = 1, $color = '') {
+    public function add_event(string $txt, $date, int $days = 1, $color = '') {
         $color = $color ? ' ' . $color : $color;
         $this->events[] = [$txt, $date, $days, $color];
     }
@@ -50,7 +50,7 @@ class Calendar {
             foreach ($this->events as $event) {
                 for ($d = 0; $d <= ($event[2] - 1); $d++) {
                     if (date('y-m-d', strtotime($this->active_year . '-' . $this->active_month . '-' . $i . ' -' . $d . ' day')) == date('y-m-d', strtotime($event[1]))) {
-                        $html .= '<div class="event" style="background-color:'. getRandColor(). '">';
+                        $html .= '<div class="event p-1 rounded-md text-sm" style="background-color:'. getRandColor(). '">';
                         $html .= $event[0];
                         $html .= '</div>';
                     }
