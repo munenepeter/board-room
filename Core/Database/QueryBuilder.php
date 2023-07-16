@@ -187,9 +187,7 @@ class QueryBuilder {
       if (str_contains($sql, "update") || str_contains($sql, "delete")) {
         logger("Warning", "Database: Empty results for:<br> <pre>{$sql}</pre>");
         return true;
-      }
-      return false;
-      
+      }      
     }
       return  $results;
   }
