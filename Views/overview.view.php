@@ -15,12 +15,12 @@
         <?php include_once 'sections/second-nav.view.php'; ?>
 
         <section class="bg-white p-4 md:ml-2 h-auto flex justify-between">
-            <article class="w-full flex justify-between my-2 pb-6 p-2 border rounded-md shadow">
-                <section class="max-w-xl dark:bg-gray-700 bg-gray-50 rounded-b p-8 rounded-md shadow-sm">
-                    <h1 class="text-xl mb-4 font-bold">Upcoming meetings</h1>
+            <article class="w-full flex justify-around my-2 pb-6 p-2">
+                <section class="max-w-xl dark:bg-gray-700 p-8 rounded-md shadow-sm border border-blue-100">
+                    <h1 class="text-xl mb-4 font-bold text-blue-900">Upcoming meetings</h1>
                     <?php if(!empty($meetings)):?>
                     <?php foreach ($meetings as $meeting) : ?>
-                        <div class="border-b py-4 border-gray-400 border-dashed">
+                        <div class="border-b py-4 border-blue-400 border-dashed">
                             <div class="flex justify-between items-center">
                                 <a tabindex="0" class="focus:outline-none text-lg font-medium leading-5 text-gray-700 dark:text-gray-100 mt-2"><?= $meeting->name ?>
                                     <span class="
@@ -53,11 +53,11 @@
                         </div>
                     <?php endforeach; ?>
                     <?php else:?>
-                        <div class="border-b border-gray-400 border-dashed">
-                            <p class="pt-2 flex items-center justify-start space-x-2 text-xs font-light leading-3 text-gray-500 dark:text-gray-300">
+                        <div class="border-b border-blue-400 border-dashed">
+                            <p class="py-8 flex justify-start items-center space-x-2 text-xs font-light leading-3 text-gray-500 dark:text-gray-300">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                                </svg> <span  class="text-lg font-medium leading-5 text-gray-700 dark:text-gray-100 mt-2">
+                                </svg> <span  class="text-lg font-medium leading-5 text-gray-500 dark:text-gray-100 mt-2">
                                    Seems like there are no Upcoming meetings!
                                 </span>
                             </p>

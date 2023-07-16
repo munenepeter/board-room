@@ -1,6 +1,6 @@
-<div x-data="calendar()" class="max-w-sm w-full">
-    <div class="md:p-8 p-5 dark:bg-gray-800 bg-white rounded-t">
-        <div class="px-4 flex items-center justify-between">
+<div x-data="calendar()" class="max-w-lg w-full rounded-md ">
+    <div class="md:p-4 p-2 dark:bg-gray-800 bg-white rounded-t">
+        <div class="px-2 flex items-center justify-between">
             <span tabindex="0" class="focus:outline-none  text-base font-bold dark:text-gray-100 text-gray-800" x-text="`${getMonthName(month)}, ${year}`">October
                 2020</span>
             <div class="flex items-center">
@@ -19,7 +19,7 @@
 
             </div>
         </div>
-        <div class="flex items-center justify-between pt-12 overflow-x-auto ">
+        <div class="flex items-center justify-between pt-6 overflow-x-auto ">
             <table class="w-full">
                 <thead>
                     <tr>
@@ -67,12 +67,12 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="shadow-md">
                     <template x-for="week in weeks">
                         <tr>
                             <template x-for="day in week">
-                                <td :class="{'bg-blue-500 text-white border rounded-md hover:bg-blue-400': isActive(day) == true, 'border rounded-md hover:bg-gray-200': isActive(day) == false }" class="border rounded-md">
-                                    <div class="px-2 py-2 cursor-pointer flex w-full justify-center">
+                                <td :class="{'bg-blue-300 text-white border border-blue-100 hover:bg-blue-400': isActive(day) == true, 'border border-blue-100 hover:bg-gray-200': isActive(day) == false }" class="border rounded-md">
+                                    <div class="px-3 py-3 cursor-pointer flex w-full justify-center">
                                         <a :href="'/meetings/view?intent=check_event&date='+`${day} ${getMonthName(month)} ${year}`" class="text-base text-gray-800 dark:text-gray-100 font-medium" x-text="day">5</a>
                                     </div>
                                 </td>
