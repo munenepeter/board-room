@@ -93,13 +93,14 @@
         <div class="container mx-auto px-1">
             <?php
 
-            $calendar = new \BoardRoom\Core\Calendar();
+            $calendar = new \BoardRoom\Core\Calendar($date->format("Y-m-d"));
 
             foreach ($meetings as $meeting) {
-                $txt = "<p class=\"text-sm text-white\">{$meeting->name}  .  <span class=\"text-xs\">{$meeting->type}</span></p>
-                        <p class=\"text-xs text-white\">".format_time_to_minutes($meeting->duration) ."</p>";
+                $txt = "<p class=\"text-sm text-white\">{$meeting->name}  .  <span class=\"text-xs\">".format_time_to_minutes($meeting->duration) ."</span></p>";
                 $calendar->add_event($txt, date('Y-m-d', strtotime($meeting->meeting_date)));
             }
+            $calendar->add_event("Test",'2023-08-16');
+
             echo $calendar;
             ?>
         </div>
