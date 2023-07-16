@@ -46,13 +46,13 @@ class Calendar {
                 $selected = 'bg-blue-700 p-1 rounded-full text-white';
             }
             $html .= '<div class="day_num flex flex-col hover:bg-gray-200">';
-            $html .= '<span class="' . $selected . '">' . $i . '</span>';
+            $html .= '<a href="/meetings/view?intent=check_event&date='.urlencode($i . '-' . $this->active_month . '-' . $this->active_year).'" class="block ' . $selected . '">' . $i . '</a>';
             foreach ($this->events as $event) {
                 for ($d = 0; $d <= ($event[2] - 1); $d++) {
                     if (date('y-m-d', strtotime($this->active_year . '-' . $this->active_month . '-' . $i . ' -' . $d . ' day')) == date('y-m-d', strtotime($event[1]))) {
-                        $html .= '<div class="rounded-md text-sm" style="color:'. getRandColor(). '">';
+                        $html .= '<a href="/meetings/view?intent=view_event&date='.urlencode($event[2]).'" class="text-sm" style="color:'. getRandColor(). '">';
                         $html .= $event[0];
-                        $html .= '</div>';
+                        $html .= '</a>';
                     }
                 }
             }

@@ -9,12 +9,12 @@
         <p><span class="font-semibold"><?= date_format($date, "F j, Y") ?></span><br><span class="text-sm text-gray-400"><?= date_format($date, "l") ?></span></p>
         <div class="flex items-center justify-end space-x-4">
             <div class="text-center flex justify-between">
-                <a href="?date=<?=urlencode(date_format($month_later->modify('-1 month'), 'Y-m-d'))?>" class="mr-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                <a href="?intent=check_new_month&date=<?=urlencode(date_format($month_later->modify('-1 month'), 'Y-m-d'))?>" class="mr-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                     </svg>
                 </a>
                 <h2 class="text-md font-bold"><?= date_format($date, "F") ?></h2>
-                <a href="?date=<?=urlencode(date_format($month_later->modify('+2 month'), 'Y-m-d'))?>" class="ml-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                <a href="?intent=check_new_month&date=<?=urlencode(date_format($month_later->modify('+2 month'), 'Y-m-d'))?>" class="ml-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                     </svg>
                 </a>
