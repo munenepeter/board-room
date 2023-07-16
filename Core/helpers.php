@@ -126,30 +126,7 @@ function wp_strip_all_tags($string, $remove_breaks = false) {
     return trim($string);
 }
 
-function lilog(string $msg) {
 
-    $msg = "On " . date('Y-m-d H:i:s', time()) . " " . $msg . PHP_EOL;
-    $logFile =  __DIR__ . "/../static/files/li.log";
-
-    $file = fopen($logFile, 'a+', 1);
-    fwrite($file, $msg);
-    fclose($file);
-}
-function getLogs() {
-    $log = "static/files/li.log";
-
-    if (!file_exists($log)) {
-        echo "File Does not exist, call the developer!";
-        exit;
-    }
-    $data = file_get_contents($log);
-
-    $logs = explode(PHP_EOL, $data);
-
-    array_pop($logs);
-
-    return array_reverse($logs);
-}
 
 function getRandColor() {
     $rgbColor = [];
@@ -175,6 +152,32 @@ function subtract_date($days_to_subtract) {
     date_sub($date, date_interval_create_from_date_string("2 days"));
     return date_format($date, 'Y-m-d H:i:s');
 }
+
+/**
+ * Converts a time string to 10 AM.
+ *
+ * @param string $time The time string in 24-hour format.
+ * @return string The time in 10 AM format.
+ */
+function get_time(string $time): string {
+    $hour = date("G", strtotime($time));
+
+    if ($hour >= 12) {
+        $am_pm = "PM";
+        if ($hour > 12) {
+            $hour -= 12;
+        }
+    } else {
+        $am_pm = "AM";
+        if ($hour == 0) {
+            $hour = 12;
+        }
+    }
+
+    return "$hour$am_pm";
+}
+
+
 
 function slug($string) {
     return strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $string)));

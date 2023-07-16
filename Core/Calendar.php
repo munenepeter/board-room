@@ -24,18 +24,18 @@ class Calendar {
         $num_days_last_month = date('j', strtotime('last day of previous month', strtotime($this->active_day . '-' . $this->active_month . '-' . $this->active_year)));
         $days = [0 => 'Sun', 1 => 'Mon', 2 => 'Tue', 3 => 'Wed', 4 => 'Thu', 5 => 'Fri', 6 => 'Sat'];
         $first_day_of_week = array_search(date('D', strtotime($this->active_year . '-' . $this->active_month . '-1')), $days);
-        $html = '<div class="calendar">';
-        $html .= '<div class="days">';
+        $html = '<div class="calendar flex flex-col">';
+        $html .= '<div class="days flex flex-wrap">';
         foreach ($days as $day) {
             $html .= '
-                <div class="day_name">
+                <div class="day_name border border-gray-300 font-bold text-sm">
                     ' . $day . '
                 </div>
             ';
         }
         for ($i = $first_day_of_week; $i > 0; $i--) {
             $html .= '
-                <div class="day_num ignore">
+                <div class="day_num flex flex-col bg-gray-100 text-gray-500">
                     ' . ($num_days_last_month - $i + 1) . '
                 </div>
             ';
@@ -43,14 +43,14 @@ class Calendar {
         for ($i = 1; $i <= $num_days; $i++) {
             $selected = '';
             if ($i == $this->active_day) {
-                $selected = ' selected';
+                $selected = 'bg-blue-700 p-1 rounded-full text-white';
             }
-            $html .= '<div class="day_num' . $selected . '">';
-            $html .= '<span>' . $i . '</span>';
+            $html .= '<div class="day_num flex flex-col hover:bg-gray-200">';
+            $html .= '<span class="' . $selected . '">' . $i . '</span>';
             foreach ($this->events as $event) {
                 for ($d = 0; $d <= ($event[2] - 1); $d++) {
                     if (date('y-m-d', strtotime($this->active_year . '-' . $this->active_month . '-' . $i . ' -' . $d . ' day')) == date('y-m-d', strtotime($event[1]))) {
-                        $html .= '<div class="event p-1 rounded-md text-sm" style="background-color:'. getRandColor(). '">';
+                        $html .= '<div class="rounded-md text-sm" style="color:'. getRandColor(). '">';
                         $html .= $event[0];
                         $html .= '</div>';
                     }
@@ -60,7 +60,7 @@ class Calendar {
         }
         for ($i = 1; $i <= (42 - $num_days - max($first_day_of_week, 0)); $i++) {
             $html .= '
-                <div class="day_num ignore">
+                <div class="day_num flex flex-col bg-gray-100 text-gray-500">
                     ' . $i . '
                 </div>
             ';

@@ -9,11 +9,9 @@
     <?php include_once 'sections/sidebar.view.php'; ?>
 
     <main class="bg-white pt-4 ml-32 my-2">
-       
 
         <?php include_once 'sections/second-nav.view.php'; ?>
-
-        <article class="w-full flex justify-around my-12 pb-6 p-2 border rounded-md shadow-sm">
+        <article class="w-full flex justify-around my-1 pb-6 p-2 border rounded-md shadow-sm">
             <section class="w-3/4 dark:bg-gray-700 bg-white rounded-b p-2">
                 <div class="overflow-y-auto max-h-[28rem]  w-full">
                     <div class="ml-1 flex flex-col">
