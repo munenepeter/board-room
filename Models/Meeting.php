@@ -20,6 +20,18 @@ class Meeting extends Model {
         );
     }
 
+    public static function upcoming() {
+        return App::get('database')->query(
+            "SELECT meetings.id, employees.username as owner, meeting_types.type as type, meeting_details.name as name, meeting_details.duration as duration, meeting_details.meeting_date, meetings.created_at
+        FROM meetings
+        JOIN employees ON meetings.employee_no = employees.employee_no
+        JOIN meeting_types ON meetings.meeting_type_id = meeting_types.id
+        JOIN meeting_details ON meetings.meeting_details_id = meeting_details.id
+        WHERE meeting_details.meeting_date > CURDATE();
+        "
+        );
+    }
+
     public static function create(array $meeting) {
 
         $database = (is_dev()) ? App::get('config')['sqlite'] : App::get('config')['mysql'];

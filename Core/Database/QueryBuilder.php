@@ -33,7 +33,7 @@ class QueryBuilder {
       $statement->execute();
     } catch (\Exception $e) {
 
-      logger("Error", '<b>' . $e->getMessage() . '</b>' . PHP_EOL . " $sql ");
+      logger("Error", 'Database: ' . $e->getMessage(). PHP_EOL . " $sql ");
       throw new \Exception("Wrong query <br> <pre>{$sql}</pre>" .PHP_EOL. $e->getCode());
     }
 
@@ -42,7 +42,7 @@ class QueryBuilder {
 
     if (is_null($results) || empty($results)) {
       if (str_contains($sql, "update") || str_contains($sql, "delete")) {
-        logger("Warning", "Database: Empty results for:<br> <pre>{$sql}</pre>");
+        logger("Warning", "Database: Empty results for your query <br /> <pre>{$sql}</pre>");
         return true;
       }
       return false;
@@ -177,7 +177,7 @@ class QueryBuilder {
       $statement->execute();
     } catch (\Exception $e) {
 
-      logger("Error", '<b>' . $e->getMessage() . '</b>' . PHP_EOL . " $sql ");
+      logger("Error", 'Database: ' . $e->getMessage(). PHP_EOL . " $sql ");
       throw new \Exception("Wrong query <br> <pre>{$sql}</pre>" .PHP_EOL. $e->getCode());
     }
    

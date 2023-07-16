@@ -31,7 +31,7 @@ class Logger {
                 "time_zone" => $userinfo->time_zone ?? "N/A",
                 "agent" => $_SERVER['HTTP_USER_AGENT']
             ],
-            "desc" => nl2br($msg)
+            "description" => nl2br($msg)
         ]) . PHP_EOL;
 
         $logFile =  __DIR__ . "/Logs/logs.log";

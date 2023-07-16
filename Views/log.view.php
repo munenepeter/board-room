@@ -3,6 +3,8 @@ include_once 'base.view.php';
 include_once 'sections/nav.view.php';
 
 $all = implode(",", $logs);
+
+
 ?>
 <div class="bg-gray-100 mt-12 rounded-md">
 
@@ -52,7 +54,7 @@ $all = implode(",", $logs);
                 </form>
             </div>
         </div>
-        <div class="overflow-y-auto relative shadow-md sm:rounded-lg" style="height: 430px ;">
+        <div class="overflow-y-auto relative shadow-md sm:rounded-lg" style="height: 505px ;">
             <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400 " x-data="{selected:null}">
                 <thead class=" sticky top-0 text-xs text-gray-700  bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
@@ -123,7 +125,7 @@ $all = implode(",", $logs);
                                 <?= ENV; ?>
                             </td>
                             <td class="py-3 px-2 md:px-6">
-                                <?= strstr($log->desc, '<br>', true) !== false ? strstr($log->desc, '<br>', true) : $log->desc ?>
+                                <?= strstr($log->description, '<br />', true) !== false ? strstr($log->description, '<br />', true) : $log->description ?>
                             </td>
 
                         </tr>
@@ -141,7 +143,7 @@ $all = implode(",", $logs);
                                 #
                                 <?= $count; ?><br>
                                 <b>*Message*</b> <i>
-                                    <?= $log->desc; ?>
+                                    <?= $log->description; ?>
                                 </i><br>
                                 <b>*Request*</b>
                                 <?= $log->more->method; ?>
@@ -190,6 +192,8 @@ $all = implode(",", $logs);
             submitBtn.classList.add('bg-green-400', 'hover:bg-green-500', 'focus:ring-green-300');
             submitBtn.classList.remove('bg-blue-400', 'hover:bg-blue-500', 'focus:ring-red-300');
             submitBtn.innerHTML = "Logs Deleted";
+            window.location.replace(window.location.pathname + window.location.search + window.location.hash);
+
 
             setTimeout(function () {
                 submitBtn.classList.remove('bg-green-400', 'hover:bg-green-500', 'focus:ring-green-300');

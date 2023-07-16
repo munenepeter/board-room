@@ -16,7 +16,7 @@ class PagesController extends Controller {
         ]);
     }
     public function overview() {
-        $meetings =  Meeting::all();
+        $meetings =  Meeting::upcoming();
         return view('overview', [
             'meetings' => $meetings
         ]);
