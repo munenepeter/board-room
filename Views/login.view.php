@@ -28,9 +28,9 @@
                   </div>
                   <p class="<?= isset($errors) ? '' : 'hidden'?> text-sm font-medium text-center text-red-500"><?= isset($errors) ? $errors : ''?></p>
                   <button type="submit" class="w-full text-white bg-purple-600 hover:bg-purple-700 focus:ring-4 focus:outline-none focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-800">Sign in</button>
-                  <p class="text-sm font-light text-gray-500 dark:text-gray-400">
+                  <!-- <p class="text-sm font-light text-gray-500 dark:text-gray-400">
                       Don’t have an account yet? <a href="#" class="font-medium text-purple-600 hover:underline dark:text-purple-500">Sign up</a>
-                  </p>
+                  </p> -->
               </form>
           </div>
       </div>
