@@ -83,22 +83,39 @@
                     <h1 class="text-xl mb-2 font-bold text-rose-900">Board Room Stats</h1>
                     <?php if (!empty($meetings)) : ?>
                         <?php
-                        $count = array_count_values(array_column($meetings, 'type'));
+                        $meeting_type_count = array_count_values(array_column($meetings, 'type'));
+
+
+                        $meetingCounts = array_count_values(array_column($meetings, 'owner_department'));
+
+                        $totalMeetings = array_sum($meetingCounts);
+                        $largestDepartment = "";
+                        $largestCount = 0;
+
+                        foreach ($meetingCounts as $department => $count) {
+                            if ($count > $largestCount) {
+                                $largestDepartment = $department;
+                                $largestCount = $count;
+                            }
+                        }
+
+                        // Step 3: Calculate the percentage of meetings for the largest department
+                        $percentageLargestDepartment = ($largestCount / $totalMeetings) * 100;
 
                         ?>
                         <div class="border-b py-4 border-blue-400 border-dashed">
                             <div class="flex justify-between items-center space-x-2">
                                 <a tabindex="0" class="focus:outline-none text-lg font-medium leading-5 text-gray-700 dark:text-gray-100 mt-2">Total Meetings <?= count($meetings) ?>
-                                    <span class=" bg-yellow-100 text-yellow-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">External (<?= $count['External'] ?>)</span>
-                                    <span class=" bg-green-100 text-green-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Hybrid (<?= $count['Hybrid'] ?>)</span>
-                                    <span class=" bg-blue-100 text-blue-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Internal (<?= $count['Internal'] ?>)</span>
+                                    <span class=" bg-yellow-100 text-yellow-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">External (<?= $meeting_type_count['External'] ?>)</span>
+                                    <span class=" bg-green-100 text-green-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Hybrid (<?= $meeting_type_count['Hybrid'] ?>)</span>
+                                    <span class=" bg-blue-100 text-blue-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Internal (<?= $meeting_type_count['Internal'] ?>)</span>
                                 </a>
 
                             </div>
                             <p class="py-2 flex items-center justify-start space-x-2 text-xs font-light leading-3 text-gray-500 dark:text-gray-300">
 
                             </p>
-                            <p class="text-sm pt-2 leading-4 leading-none text-gray-600 dark:text-gray-300">90% of the meetings were booked by the IT department</p>
+                            <p class="text-sm pt-2 leading-4 leading-none text-gray-600 dark:text-gray-300"><?= round($percentageLargestDepartment, 1) . "% " ?>of the meetings were booked by the <?= $largestDepartment ?> department</p>
                         </div>
                         <!-- previous month -->
                         <div class="border-b py-4 border-blue-400 border-dashed">
@@ -119,16 +136,16 @@
                         <div class="border-b py-4 border-blue-400 border-dashed">
                             <div class="flex justify-between items-center space-x-2">
                                 <a tabindex="0" class="focus:outline-none text-lg font-medium leading-5 text-gray-700 dark:text-gray-100 mt-2"><?= date_format($date, "F") ?> Meetings <?= count($meetings) ?>
-                                    <span class=" bg-yellow-100 text-yellow-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">External (<?= $count['External'] ?>)</span>
-                                    <span class=" bg-green-100 text-green-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Hybrid (<?= $count['Hybrid'] ?>)</span>
-                                    <span class=" bg-blue-100 text-blue-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Internal (<?= $count['Internal'] ?>)</span>
+                                    <span class=" bg-yellow-100 text-yellow-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">External (<?= $meeting_type_count['External'] ?>)</span>
+                                    <span class=" bg-green-100 text-green-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Hybrid (<?= $meeting_type_count['Hybrid'] ?>)</span>
+                                    <span class=" bg-blue-100 text-blue-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Internal (<?= $meeting_type_count['Internal'] ?>)</span>
                                 </a>
 
                             </div>
                             <p class="py-2 flex items-center justify-start space-x-2 text-xs font-light leading-3 text-gray-500 dark:text-gray-300">
 
                             </p>
-                            <p class="text-sm pt-2 leading-4 leading-none text-gray-600 dark:text-gray-300">90% of the meetings were booked by the IT department</p>
+                            <p class="text-sm pt-2 leading-4 leading-none text-gray-600 dark:text-gray-300"><?= round($percentageLargestDepartment, 1) . "% " ?>of the meetings were booked by the <?= $largestDepartment ?> department</p>
                         </div>
 
                         <!-- next month -->
