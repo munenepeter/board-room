@@ -32,8 +32,8 @@
                                     }
                                     ?>
                                      text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300"><?= $meeting->type ?></span>
-                                        <?php if (true) : ?>
-                                            <span class="text-red-600 text-xs font-medium mr-2 px-2.5 py-0.5">Event Expired <?= time_ago($meeting->meeting_date) ?></span>
+                                        <?php if ((new DateTime()) > (new DateTime($meeting->meeting_date))) : ?>
+                                            <span class="text-red-600 text-xs font-medium mr-2 px-2.5 py-0.5">Meeting Expired <?= time_ago($meeting->meeting_date) ?></span>
                                         <?php endif; ?>
                                     </a>
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -69,15 +69,18 @@
                 <section class="max-w-xl dark:bg-gray-700 p-4 rounded-md shadow-sm border border-rose-100">
                     <h1 class="text-xl mb-2 font-bold text-rose-900">Board Room Stats</h1>
                     <?php if (!empty($meetings)) : ?>
+                        <?php
+                        $count = array_count_values(array_column($meetings, 'type'));
 
+                        ?>
                         <div class="border-b py-4 border-blue-400 border-dashed">
                             <div class="flex justify-between items-center space-x-2">
                                 <a tabindex="0" class="focus:outline-none text-lg font-medium leading-5 text-gray-700 dark:text-gray-100 mt-2">Total Meetings <?= count($meetings) ?>
-                                    <span class=" bg-yellow-100 text-yellow-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">External (4)</span>
-                                    <span class=" bg-green-100 text-green-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Hybrid (4)</span>
-                                    <span class=" bg-blue-100 text-blue-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Internal (4)</span>
+                                    <span class=" bg-yellow-100 text-yellow-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">External (<?= $count['External'] ?>)</span>
+                                    <span class=" bg-green-100 text-green-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Hybrid (<?= $count['Hybrid'] ?>)</span>
+                                    <span class=" bg-blue-100 text-blue-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Internal (<?= $count['Internal'] ?>)</span>
                                 </a>
-                               
+
                             </div>
                             <p class="py-2 flex items-center justify-start space-x-2 text-xs font-light leading-3 text-gray-500 dark:text-gray-300">
 
@@ -87,27 +90,27 @@
                         <!-- previous month -->
                         <div class="border-b py-4 border-blue-400 border-dashed">
                             <div class="flex justify-between items-center space-x-2">
-                                <a tabindex="0" class="focus:outline-none text-lg font-medium leading-5 text-gray-700 dark:text-gray-100 mt-2"><?= date_format($month_later->modify('-2 month'), 'F') ?> Meetings (4)
-                                    <span class=" bg-yellow-100 text-yellow-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">External (4)</span>
-                                    <span class=" bg-green-100 text-green-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Hybrid (4)</span>
-                                    <span class=" bg-blue-100 text-blue-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Internal (4)</span>
+                                <a tabindex="0" class="focus:outline-none text-lg font-medium leading-5 text-gray-700 dark:text-gray-100 mt-2"><?= date_format($month_later->modify('-2 month'), 'F') ?> Meetings (0)
+                                    <span class=" bg-yellow-100 text-yellow-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">External (0)</span>
+                                    <span class=" bg-green-100 text-green-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Hybrid (0)</span>
+                                    <span class=" bg-blue-100 text-blue-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Internal (0)</span>
                                 </a>
-                               
+
                             </div>
                             <p class="py-2 flex items-center justify-start space-x-2 text-xs font-light leading-3 text-gray-500 dark:text-gray-300">
 
                             </p>
-                            <p class="text-sm pt-2 leading-4 leading-none text-gray-600 dark:text-gray-300">90% of the meetings were booked by the IT department</p>
+                            <p class="text-sm pt-2 leading-4 leading-none text-gray-600 dark:text-gray-300">No meetings were set during this time!</p>
                         </div>
                         <!-- current month -->
                         <div class="border-b py-4 border-blue-400 border-dashed">
                             <div class="flex justify-between items-center space-x-2">
-                                <a tabindex="0" class="focus:outline-none text-lg font-medium leading-5 text-gray-700 dark:text-gray-100 mt-2"><?= date_format($date, "F") ?> Meetings (4)
-                                    <span class=" bg-yellow-100 text-yellow-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">External (4)</span>
-                                    <span class=" bg-green-100 text-green-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Hybrid (4)</span>
-                                    <span class=" bg-blue-100 text-blue-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Internal (4)</span>
+                                <a tabindex="0" class="focus:outline-none text-lg font-medium leading-5 text-gray-700 dark:text-gray-100 mt-2"><?= date_format($date, "F") ?> Meetings <?= count($meetings) ?>
+                                    <span class=" bg-yellow-100 text-yellow-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">External (<?= $count['External'] ?>)</span>
+                                    <span class=" bg-green-100 text-green-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Hybrid (<?= $count['Hybrid'] ?>)</span>
+                                    <span class=" bg-blue-100 text-blue-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Internal (<?= $count['Internal'] ?>)</span>
                                 </a>
-                              
+
                             </div>
                             <p class="py-2 flex items-center justify-start space-x-2 text-xs font-light leading-3 text-gray-500 dark:text-gray-300">
 
@@ -116,20 +119,20 @@
                         </div>
 
                         <!-- next month -->
-                        <div class="border-b py-4 border-blue-400 border-dashed">
+                        <!-- <div class="border-b py-4 border-blue-400 border-dashed">
                             <div class="flex justify-between items-center space-x-2">
-                                <a tabindex="0" class="focus:outline-none text-lg font-medium leading-5 text-gray-700 dark:text-gray-100 mt-2"><?= date_format($month_later->modify('+2 month'), 'F') ?> Meetings (4)
-                                    <span class=" bg-yellow-100 text-yellow-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">External (4)</span>
-                                    <span class=" bg-green-100 text-green-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Hybrid (4)</span>
-                                    <span class=" bg-blue-100 text-blue-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Internal (4)</span>
+                                <a tabindex="0" class="focus:outline-none text-lg font-medium leading-5 text-gray-700 dark:text-gray-100 mt-2"><?= date_format($month_later->modify('+2 month'), 'F') ?> Meetings (0)
+                                    <span class=" bg-yellow-100 text-yellow-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">External (0)</span>
+                                    <span class=" bg-green-100 text-green-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Hybrid (0)</span>
+                                    <span class=" bg-blue-100 text-blue-800 text-xs font-medium mx-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">Internal (0)</span>
                                 </a>
-                              
+
                             </div>
                             <p class="py-2 flex items-center justify-start space-x-2 text-xs font-light leading-3 text-gray-500 dark:text-gray-300">
 
                             </p>
                             <p class="text-sm pt-2 leading-4 leading-none text-gray-600 dark:text-gray-300">90% of the meetings were booked by the IT department</p>
-                        </div>
+                        </div> -->
 
 
                     <?php else : ?>

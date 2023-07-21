@@ -52,8 +52,6 @@
                 $txt = "<p class=\"text-sm font-bold\">{$meeting->name}  .  <span class=\"text-xs\">" . get_time($meeting->meeting_date)."</span></p>";
                 $calendar->add_event($txt, date('Y-m-d', strtotime($meeting->meeting_date)));
             }
-            $calendar->add_event("Test",'2023-08-16');
-
             echo $calendar;
             ?>
         </div>
