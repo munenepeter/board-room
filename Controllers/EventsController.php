@@ -13,6 +13,7 @@ class EventsController extends Controller {
     public function book() {
         $meeting = request()->all();
         Meeting::create($meeting); 
+        return redirect('/');
     }
  
 }
