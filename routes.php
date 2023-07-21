@@ -1,24 +1,24 @@
 <?php
 
-$router->get('', 'PagesController@index');
-$router->get('overview', 'PagesController@overview');
-$router->get('meetings', 'PagesController@meetings');
-$router->get('meetings/view', 'PagesController@MeetingsView');
+$router->get('board-room/', 'PagesController@index');
+$router->get('board-room/overview', 'PagesController@overview');
+$router->get('board-room/meetings', 'PagesController@meetings');
+$router->get('board-room/meetings/view', 'PagesController@MeetingsView');
 
-$router->get('login', 'AuthController@index');
-$router->post('auth/login', 'AuthController@login');
-$router->post('auth/logout', 'AuthController@signout');
+$router->get('board-room/login', 'AuthController@index');
+$router->post('board-room/auth/login', 'AuthController@login');
+$router->post('board-room/auth/logout', 'AuthController@signout');
 
-$router->post('events/book', 'EventsController@book');
+$router->post('board-room/events/book', 'EventsController@book');
 
-$router->get('api/v1/meetings', 'ApiController@allMeetings');
+$router->get('board-room/api/v1/meetings', 'ApiController@allMeetings');
 
 
 
 
 //logs
-$router->get(':system:/logs', 'SystemController@index');
-$router->post(':system:/logs/delete', 'SystemController@deleteLogs');
+$router->get('board-room/:system:/logs', 'SystemController@index');
+$router->post('board-room/:system:/logs/delete', 'SystemController@deleteLogs');
 //robots
 $router->get('robots.txt', function (){
     return require __DIR__ ."/robots.txt";
