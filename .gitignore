@@ -1,10 +1,4 @@
 composer.phar
 .phpunit.result.cache
 /.vscode/
-/vendor/
-/.git/
 /Core/Mantle/Logs/logs.log
-/Core/Database/sqlite/database.sqlite
-/Core/Database/sqlite/database.db
-/static/files/json/
-/static/files/li.log
