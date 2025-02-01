@@ -1,13 +1,17 @@
 RewriteEngine On
 
+# Exclude assets directory and specific file types from the trailing slash rule
+RewriteCond %{REQUEST_URI} !^/assets/ [NC]
+RewriteCond %{REQUEST_URI} !\.(ico|css|js|png|jpg|jpeg|gif|svg|webp|php)$ [NC]  # Added .php exclusion
+
 # URLs without trailing slashes to URLs with trailing slashes
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_URI} !(.*)/$
 RewriteRule ^(.*)$ /$1/ [R=301,L]
 
-# access to static assets (CSS, JS, images, etc.)
+# Allow access to static assets (CSS, JS, images, etc.)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
-# other requests to index.php
+# Redirect all other requests to index.php
 RewriteRule ^(.*)$ index.php [QSA,L]
