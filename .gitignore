@@ -1,4 +1,0 @@
-composer.phar
-.phpunit.result.cache
-/.vscode/
-/Core/Mantle/Logs/logs.log
