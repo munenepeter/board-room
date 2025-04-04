@@ -1,177 +1,363 @@
 <?php
-require_once 'db.php';
-require_once 'includes/auth.php';
+require_once 'includes/header.php';
 
-if (!isLoggedIn() || !isAdmin()) {
-    header("Location: index.php");
-    exit();
+// Check if user is admin
+if ($userRole !== 'admin') {
+    header("Location: dashboard.php");
+    exit;
 }
-// statistics queries
-$total_bookings = $db->query("SELECT COUNT(*) as count FROM bookings")->fetch(PDO::FETCH_ASSOC)['count'];
 
-$most_booked_room = $db->query("
-    SELECT r.room_name, COUNT(*) as booking_count 
-    FROM bookings b 
-    JOIN boardrooms r ON b.room_id = r.room_id 
-    GROUP BY r.room_id 
-    ORDER BY booking_count DESC 
-    LIMIT 1
-")->fetch(PDO::FETCH_ASSOC);
+// Default report period (last 30 days)
+$startDate = isset($_GET['start_date']) ? $_GET['start_date'] : date('Y-m-d', strtotime('-30 days'));
+$endDate = isset($_GET['end_date']) ? $_GET['end_date'] : date('Y-m-d');
 
-$upcoming_bookings = $db->query("
-    SELECT COUNT(*) as count 
-    FROM bookings 
-    WHERE start_time > datetime('now')
-")->fetch(PDO::FETCH_ASSOC)['count'];
+// Validate dates
+if (!strtotime($startDate) || !strtotime($endDate)) {
+    $startDate = date('Y-m-d', strtotime('-30 days'));
+    $endDate = date('Y-m-d');
+}
 
-$avg_duration = $db->query("
-    SELECT AVG((julianday(end_time) - julianday(start_time)) * 24) as avg_hours 
-    FROM bookings
-")->fetch(PDO::FETCH_ASSOC)['avg_hours'];
+// Get report data
+$reportData = [
+    'room_utilization' => getRoomUtilizationReport($startDate, $endDate),
+    'booking_stats' => getBookingStats($startDate, $endDate),
+    'user_activity' => getUserActivityReport($startDate, $endDate)
+];
 
-// Main Bookings Query
-$reports = $db->query("
-    SELECT b.booking_id, b.event_name, b.start_time, b.end_time, r.room_name, u.first_name, u.last_name
-    FROM bookings b
-    JOIN boardrooms r ON b.room_id = r.room_id
-    JOIN users u ON b.user_id = u.user_id
-    ORDER BY b.start_time DESC
-");
+// Helper functions for reports
+function getRoomUtilizationReport($startDate, $endDate) {
+    global $db;
 
+    $stmt = $db->prepare("
+        SELECT 
+            r.room_id,
+            r.room_name,
+            COUNT(b.booking_id) as booking_count,
+            SUM((julianday(b.end_time) - julianday(b.start_time)) * 24) AS total_hours
+        FROM boardrooms r
+        LEFT JOIN bookings b ON r.room_id = b.room_id 
+            AND b.status = 'Approved'
+            AND b.start_time >= :start_date
+            AND b.end_time <= :end_date
+        WHERE r.is_active = 1
+        GROUP BY r.room_id
+        ORDER BY total_hours DESC
+    ");
+    $stmt->execute([
+        ':start_date' => $startDate . ' 00:00:00',
+        ':end_date' => $endDate . ' 23:59:59'
+    ]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function getBookingStats($startDate, $endDate) {
+    global $db;
+
+    $stats = [];
+
+    // Total bookings
+    $stmt = $db->prepare("
+        SELECT COUNT(*) as total_bookings,
+               SUM(CASE WHEN status = 'Approved' THEN 1 ELSE 0 END) as approved,
+               SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) as pending,
+               SUM(CASE WHEN status = 'Rejected' THEN 1 ELSE 0 END) as rejected,
+               SUM(CASE WHEN status = 'Cancelled' THEN 1 ELSE 0 END) as cancelled
+        FROM bookings
+        WHERE start_time >= :start_date
+        AND end_time <= :end_date
+    ");
+    $stmt->execute([
+        ':start_date' => $startDate . ' 00:00:00',
+        ':end_date' => $endDate . ' 23:59:59'
+    ]);
+    $stats['bookings'] = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Average booking duration
+    $stmt = $db->prepare("
+        SELECT 
+            AVG((julianday(end_time) - julianday(start_time)) * 24) AS avg_hours
+        FROM bookings
+        WHERE status = 'Approved'
+        AND start_time >= :start_date
+        AND end_time <= :end_date
+    ");
+    $stmt->execute([
+        ':start_date' => $startDate . ' 00:00:00',
+        ':end_date' => $endDate . ' 23:59:59'
+    ]);
+    $stats['avg_duration'] = $stmt->fetchColumn();
+
+    return $stats;
+}
+
+function getUserActivityReport($startDate, $endDate) {
+    global $db;
+
+    $stmt = $db->prepare("
+        SELECT 
+            u.user_id,
+            u.first_name || ' ' || u.last_name as user_name,
+            COUNT(b.booking_id) as bookings_made,
+            d.department_name
+        FROM users u
+        LEFT JOIN bookings b ON u.user_id = b.user_id
+            AND b.start_time >= :start_date
+            AND b.end_time <= :end_date
+        LEFT JOIN departments d ON u.department_id = d.department_id
+        GROUP BY u.user_id
+        ORDER BY bookings_made DESC
+        LIMIT 10
+    ");
+    $stmt->execute([
+        ':start_date' => $startDate . ' 00:00:00',
+        ':end_date' => $endDate . ' 23:59:59'
+    ]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reports - Board Room Management</title>
-    <link href="assets/css/main.css" rel="stylesheet">
-</head>
-<body class="bg-gray-50 min-h-screen">
-    <!-- Top Navigation -->
-    <nav class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <h1 class="text-xl font-bold text-gray-900">Board Room Management</h1>
+<main class="py-6 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <div class="sm:flex sm:items-center">
+                <div class="sm:flex-auto">
+                    <h1 class="text-2xl font-bold text-maroon-800">Reports</h1>
+                    <p class="mt-2 text-sm text-gray-600">
+                        View system usage statistics and analytics
+                    </p>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <a href="dashboard.php" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
-                        Back to Dashboard
+            </div>
+
+            <!-- Date Filter -->
+            <div class="mt-6 bg-white shadow rounded-lg p-4">
+                <form method="get" class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                    <div class="sm:col-span-2">
+                        <label for="start_date" class="block text-sm font-medium text-gray-700">Start Date</label>
+                        <input type="date" name="start_date" id="start_date" value="<?= $startDate ?>"
+                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-maroon-500 focus:border-maroon-500 sm:text-sm">
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label for="end_date" class="block text-sm font-medium text-gray-700">End Date</label>
+                        <input type="date" name="end_date" id="end_date" value="<?= $endDate ?>"
+                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-maroon-500 focus:border-maroon-500 sm:text-sm">
+                    </div>
+
+                    <div class="sm:col-span-2 flex items-end">
+                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-maroon-600 hover:bg-maroon-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-maroon-500">
+                            Generate Report
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Booking Statistics -->
+            <div class="mt-8">
+                <h2 class="text-lg font-medium text-maroon-700 mb-4">Booking Statistics</h2>
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-4">
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="px-4 py-5 sm:p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 bg-maroon-500 rounded-md p-3">
+                                    <i class="fas fa-calendar-check text-white"></i>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Total Bookings</dt>
+                                        <dd class="flex items-baseline">
+                                            <div class="text-2xl font-semibold text-gray-900">
+                                                <?= $reportData['booking_stats']['bookings']['total_bookings'] ?>
+                                            </div>
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="px-4 py-5 sm:p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+                                    <i class="fas fa-check-circle text-white"></i>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Approved</dt>
+                                        <dd class="flex items-baseline">
+                                            <div class="text-2xl font-semibold text-gray-900">
+                                                <?= $reportData['booking_stats']['bookings']['approved'] ?>
+                                            </div>
+                                            <div class="ml-2 flex items-baseline text-sm font-semibold text-green-600">
+                                                <?= $reportData['booking_stats']['bookings']['total_bookings'] > 0 ?
+                                                    round(($reportData['booking_stats']['bookings']['approved'] / $reportData['booking_stats']['bookings']['total_bookings']) * 100) : 0 ?>%
+                                            </div>
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="px-4 py-5 sm:p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+                                    <i class="fas fa-clock text-white"></i>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Pending</dt>
+                                        <dd class="flex items-baseline">
+                                            <div class="text-2xl font-semibold text-gray-900">
+                                                <?= $reportData['booking_stats']['bookings']['pending'] ?>
+                                            </div>
+                                            <div class="ml-2 flex items-baseline text-sm font-semibold text-yellow-600">
+                                                <?= $reportData['booking_stats']['bookings']['total_bookings'] > 0 ?
+                                                    round(($reportData['booking_stats']['bookings']['pending'] / $reportData['booking_stats']['bookings']['total_bookings']) * 100) : 0 ?>%
+                                            </div>
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="px-4 py-5 sm:p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
+                                    <i class="fas fa-hourglass-half text-white"></i>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Avg Duration</dt>
+                                        <dd class="flex items-baseline">
+                                            <div class="text-2xl font-semibold text-gray-900">
+                                                <?= $reportData['booking_stats']['avg_duration'] ?? 0 ?> hrs
+                                            </div>
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Room Utilization -->
+            <div class="mt-8">
+                <h2 class="text-lg font-medium text-maroon-700 mb-4">Room Utilization</h2>
+                <div class="bg-white shadow rounded-lg overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Room
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Bookings
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Total Hours
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Utilization
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <?php foreach ($reportData['room_utilization'] as $room): ?>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-medium text-gray-900"><?= htmlspecialchars($room['room_name']) ?></div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <?= $room['booking_count'] ?>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <?= round($room['total_hours'] ?? 0, 1) ?> hrs
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <?php
+                                            $maxHours = (strtotime($endDate) - strtotime($startDate)) / (60 * 60) * 8; // 8 hours per day
+                                            $utilization = $maxHours > 0 ? ($room['total_hours'] / $maxHours) * 100 : 0;
+                                            ?>
+                                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                                <div class="bg-maroon-600 h-2.5 rounded-full" style="width: <?= min(100, $utilization) ?>%"></div>
+                                            </div>
+                                            <div class="text-xs text-gray-500 mt-1"><?= round($utilization) ?>%</div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Users -->
+            <div class="mt-8">
+                <h2 class="text-lg font-medium text-maroon-700 mb-4">Top Users by Bookings</h2>
+                <div class="bg-white shadow rounded-lg overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        User
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Department
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Bookings Made
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <?php foreach ($reportData['user_activity'] as $user): ?>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-medium text-gray-900"><?= htmlspecialchars($user['user_name']) ?></div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <?= htmlspecialchars($user['department_name'] ?? 'N/A') ?>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <?= $user['bookings_made'] ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Options -->
+            <div class="mt-8 bg-white shadow rounded-lg p-4">
+                <h2 class="text-lg font-medium text-maroon-700 mb-4">Export Reports</h2>
+                <div class="flex flex-wrap gap-4">
+                    <a href="export_report.php?type=bookings&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-maroon-600 hover:bg-maroon-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-maroon-500">
+                        <i class="fas fa-file-csv mr-2"></i> Export Bookings
+                    </a>
+                    <a href="export_report.php?type=rooms&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-maroon-600 hover:bg-maroon-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-maroon-500">
+                        <i class="fas fa-file-csv mr-2"></i> Export Room Utilization
+                    </a>
+                    <a href="export_report.php?type=users&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-maroon-600 hover:bg-maroon-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-maroon-500">
+                        <i class="fas fa-file-csv mr-2"></i> Export User Activity
                     </a>
                 </div>
             </div>
         </div>
-    </nav>
+    </div>
+</main>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="mb-8">
-            <h2 class="text-2xl font-bold text-gray-900">System Reports</h2>
-            <p class="mt-1 text-gray-600">Overview of all bookings and system statistics</p>
-        </div>
-
-        <!-- Statistics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white rounded-xl shadow-sm p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">Total Bookings</p>
-                        <p class="text-2xl font-bold text-gray-900"><?php echo number_format($total_bookings); ?></p>
-                    </div>
-                    <div class="bg-blue-100 p-3 rounded-lg">
-                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">Most Booked Room</p>
-                        <p class="text-2xl font-bold text-gray-900"><?php echo htmlspecialchars($most_booked_room['room_name']); ?></p>
-                        <p class="text-sm text-gray-600"><?php echo number_format($most_booked_room['booking_count']); ?> bookings</p>
-                    </div>
-                    <div class="bg-green-100 p-3 rounded-lg">
-                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">Upcoming Bookings</p>
-                        <p class="text-2xl font-bold text-gray-900"><?php echo number_format($upcoming_bookings); ?></p>
-                    </div>
-                    <div class="bg-purple-100 p-3 rounded-lg">
-                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">Average Duration</p>
-                        <p class="text-2xl font-bold text-gray-900"><?php echo round($avg_duration, 1); ?> hours</p>
-                    </div>
-                    <div class="bg-orange-100 p-3 rounded-lg">
-                        <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bookings Table -->
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900">All Bookings</h3>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event Name</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Time</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">End Time</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booked By</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <?php while ($row = $reports->fetch(PDO::FETCH_ASSOC)): ?>
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                <?php echo htmlspecialchars($row['event_name']); ?>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <?php echo htmlspecialchars($row['room_name']); ?>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <?php echo date('M j, Y g:i A', strtotime($row['start_time'])); ?>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <?php echo date('M j, Y g:i A', strtotime($row['end_time'])); ?>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <?php echo htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?>
-                            </td>
-                        </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </main>
 </body>
+
 </html>
