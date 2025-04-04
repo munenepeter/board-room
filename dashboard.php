@@ -1,165 +1,205 @@
 <?php
-require_once 'db.php';
-require_once 'includes/auth.php';
-
-if (!isLoggedIn()) {
-    header("Location: index.php");
-    exit();
-}
-
-// user's bookings
-$user_id = $_SESSION['user_id'];
-$query = "SELECT b.booking_id, b.event_name, b.start_time, b.end_time, r.room_name 
-          FROM bookings b 
-          JOIN boardrooms r ON b.room_id = r.room_id 
-          WHERE b.user_id = $user_id";
-
-// handle filtering by date
-if (isset($_GET['filter_date'])) {
-    $filter_date = $_GET['filter_date'];
-    $query .= " AND DATE(b.start_time) = '$filter_date'";
-}
-
-$bookings = $db->query($query);
+require_once 'includes/header.php';
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Board Room Management</title>
-    <link href="assets/css/main.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
-</head>
-
-<body class="bg-gray-50 min-h-screen">
-    <!-- Top Navigation -->
-    <nav class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <h1 class="text-xl font-bold text-gray-900">Board Room Management</h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <?php if (isAdmin()): ?>
-                        <a href="reports.php" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
-                            Reports
-                        </a>
-                    <?php endif; ?>
-                    <a href="bookings.php" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
-                        Bookings
-                    </a>
-                    <a href="logout.php" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
-                        Logout
-                    </a>
-                    <a href="book.php" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                        Book Room
-                    </a>
-                </div>
+   
+   <div class="container mx-auto px-4 py-8">
+    <div class="flex flex-col lg:flex-row gap-6">
+        <!-- Calendar Section (Left) -->
+        <div class="lg:w-2/3">
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <h2 class="text-xl font-semibold text-maroon-800 mb-4">Meeting Calendar</h2>
+                <div id="calendar" class="fc"></div>
             </div>
         </div>
-    </nav>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="mb-8">
-            <h2 class="text-2xl font-bold text-gray-900">Welcome, <?php echo $_SESSION['first_name']; ?>!</h2>
-            <p class="mt-1 text-gray-600">Manage your board room bookings and schedule</p>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Calendar Section -->
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-xl shadow-sm p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Calendar</h3>
-                    <div id="calendar"></div>
+        <!-- Bookings List Section (Right) -->
+        <div class="lg:w-1/3">
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-maroon-800">Upcoming Bookings</h2>
+                    <a href="bookings.php" class="text-sm text-maroon-600 hover:text-maroon-800">View All</a>
                 </div>
-            </div>
-
-            <!-- Bookings Section -->
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-xl shadow-sm p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Your Bookings</h3>
-
-                    <!-- Filter Form -->
-                    <form method="GET" action="dashboard.php" class="mb-6">
-                        <div class="space-y-2">
-                            <label for="filter_date" class="block text-sm font-medium text-gray-700">Filter by Date</label>
-                            <input type="date" id="filter_date" name="filter_date"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors">
-                            <div class="flex space-x-2">
-                                <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                                    Apply Filter
-                                </button>
-                                <a href="dashboard.php" class="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-center text-sm">
-                                    Clear
-                                </a>
-                            </div>
-                        </div>
-                    </form>
-
-                    <!-- Bookings List -->
-                    <div class="space-y-4">
-                        <?php while ($row = $bookings->fetch(PDO::FETCH_ASSOC)): ?>
-                            <div class="border border-gray-200 rounded-lg p-4">
-                                <h4 class="font-medium text-gray-900"><?php echo $row['event_name']; ?></h4>
-                                <div class="mt-2 space-y-1">
-                                    <div class="flex items-center text-sm text-gray-600">
-                                        <span class="w-20 text-gray-500">Room:</span>
-                                        <span><?php echo $row['room_name']; ?></span>
-                                    </div>
-                                    <div class="flex items-center text-sm text-gray-600">
-                                        <span class="w-20 text-gray-500">Start:</span>
-                                        <span><?php echo date('M j, Y g:i A', strtotime($row['start_time'])); ?></span>
-                                    </div>
-                                    <div class="flex items-center text-sm text-gray-600">
-                                        <span class="w-20 text-gray-500">End:</span>
-                                        <span><?php echo date('M j, Y g:i A', strtotime($row['end_time'])); ?></span>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endwhile; ?>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                height: 'auto',
-                events: [
+                
+                <div class="space-y-4">
                     <?php
-                    $calendar_bookings = $db->query("SELECT event_name, start_time, end_time FROM bookings WHERE user_id = $user_id");
-                    while ($row = $calendar_bookings->fetch(PDO::FETCH_ASSOC)) {
-                        echo "{
-                            title: '" . addslashes($row['event_name']) . "',
-                            start: '" . $row['start_time'] . "',
-                            end: '" . $row['end_time'] . "'
-                        },";
-                    }
+                    $upcoming_bookings = $db->prepare("
+                        SELECT b.booking_id, b.event_name, b.start_time, b.end_time, b.status, 
+                        r.room_name, r.location
+                        FROM bookings b
+                        JOIN boardrooms r ON b.room_id = r.room_id AND b.start_time >= DATETIME('now')
+                        ORDER BY b.start_time ASC
+                        LIMIT 5
+                    ");
+                    $upcoming_bookings->execute();
+
+                    $bookings = $upcoming_bookings->fetchAll(PDO::FETCH_ASSOC);
+                
+                    if (count($bookings) > 0):
+                        foreach ($bookings as $booking):
+                            $start_date = new DateTime($booking['start_time']);
+                            $end_date = new DateTime($booking['end_time']);
                     ?>
-                ],
-                eventClick: function(info) {
-                    alert('Event: ' + info.event.title + '\nStart: ' + info.event.start.toLocaleString());
-                },
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    <div class="border border-gray-200 rounded-lg p-4 hover:border-maroon-300 transition-colors">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-medium text-gray-900"><?= htmlspecialchars($booking['event_name']) ?></h3>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium 
+                                <?= $booking['status'] == 'Approved' ? 'bg-green-100 text-green-800' : '' ?>
+                                <?= $booking['status'] == 'Pending' ? 'bg-yellow-100 text-yellow-800' : '' ?>
+                                <?= $booking['status'] == 'Rejected' ? 'bg-red-100 text-red-800' : '' ?>">
+                                <?= $booking['status'] ?>
+                            </span>
+                        </div>
+                        
+                        <div class="mt-2 flex items-center text-sm text-gray-500">
+                            <i class="fas fa-door-open text-maroon-500 mr-2"></i>
+                            <?= htmlspecialchars($booking['room_name']) ?> (<?= htmlspecialchars($booking['location']) ?>)
+                        </div>
+                        
+                        <div class="mt-1 flex items-center text-sm text-gray-500">
+                            <i class="fas fa-calendar-day text-maroon-500 mr-2"></i>
+                            <?= $start_date->format('M j, Y') ?>
+                        </div>
+                        
+                        <div class="mt-1 flex items-center text-sm text-gray-500">
+                            <i class="fas fa-clock text-maroon-500 mr-2"></i>
+                            <?= $start_date->format('g:i A') ?> - <?= $end_date->format('g:i A') ?>
+                        </div>
+                        
+                        <div class="mt-3 flex justify-end">
+                            <a href="booking_details.php?id=<?= $booking['booking_id'] ?>" class="text-sm text-maroon-600 hover:text-maroon-800 font-medium">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                    <?php
+                        endforeach;
+                    else:
+                    ?>
+                    <div class="text-center py-6">
+                        <i class="fas fa-calendar-times text-gray-400 text-4xl mb-2"></i>
+                        <p class="text-gray-500">No upcoming bookings</p>
+                        <a href="book_room.php" class="mt-2 inline-block text-sm text-maroon-600 hover:text-maroon-800 font-medium">
+                            Book a room now
+                        </a>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            
+            <!-- Quick Actions Card -->
+            <div class="bg-white rounded-lg shadow-md p-4 mt-6">
+                <h2 class="text-xl font-semibold text-maroon-800 mb-4">Quick Actions</h2>
+                <div class="space-y-3">
+                    <a href="book_room.php" class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-maroon-50 hover:border-maroon-300 transition-colors">
+                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-maroon-100 text-maroon-600 flex items-center justify-center mr-3">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-gray-900">New Booking</h3>
+                            <p class="text-sm text-gray-500">Book a meeting room</p>
+                        </div>
+                    </a>
+                    <a href="find_room.php" class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-maroon-50 hover:border-maroon-300 transition-colors">
+                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-maroon-100 text-maroon-600 flex items-center justify-center mr-3">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-gray-900">Find Available Room</h3>
+                            <p class="text-sm text-gray-500">Check real-time availability</p>
+                        </div>
+                    </a>
+                    <?php if (in_array($userRole, ['approver', 'admin'])): ?>
+                    <a href="approvals.php" class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-maroon-50 hover:border-maroon-300 transition-colors">
+                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-maroon-100 text-maroon-600 flex items-center justify-center mr-3">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-gray-900">Pending Approvals</h3>
+                            <p class="text-sm text-gray-500">Review booking requests</p>
+                        </div>
+                    </a>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FullCalendar Styles and Script -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            height: 'auto',
+            events: [
+                <?php
+                $calendar_bookings = $db->prepare("
+                    SELECT b.booking_id, b.event_name, b.start_time, b.end_time, b.status, r.room_name
+                    FROM bookings b
+                    JOIN boardrooms r ON b.room_id = r.room_id
+                    WHERE b.user_id = :user_id OR 
+                          (b.status = 'Approved' AND :user_role IN ('approver', 'admin'))
+                ");
+                $calendar_bookings->execute([
+                    ':user_id' => $userId,
+                    ':user_role' => $userRole
+                ]);
+                
+                while ($row = $calendar_bookings->fetch(PDO::FETCH_ASSOC)) {
+                    $color = '';
+                    if ($row['status'] == 'Pending') $color = '#f59e0b';
+                    else if ($row['status'] == 'Approved') $color = '#065f46';
+                    else if ($row['status'] == 'Rejected') $color = '#b91c1c';
+                    
+                    echo "{
+                        title: '" . addslashes($row['event_name']) . " - " . addslashes($row['room_name']) . "',
+                        start: '" . $row['start_time'] . "',
+                        end: '" . $row['end_time'] . "',
+                        color: '" . $color . "',
+                        extendedProps: {
+                            status: '" . $row['status'] . "'
+                        }
+                    },";
                 }
-            });
-            calendar.render();
+                ?>
+            ],
+            eventClick: function(info) {
+                // You could show a modal here instead of an alert
+                alert(
+                    'Event: ' + info.event.title + '\n' +
+                    'Status: ' + info.event.extendedProps.status + '\n' +
+                    'Start: ' + info.event.start.toLocaleString() + '\n' +
+                    'End: ' + info.event.end.toLocaleString()
+                );
+            },
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            views: {
+                timeGridWeek: {
+                    titleFormat: { year: 'numeric', month: 'short', day: 'numeric' }
+                },
+                timeGridDay: {
+                    titleFormat: { year: 'numeric', month: 'short', day: 'numeric' }
+                }
+            },
+            eventTimeFormat: {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            }
         });
-    </script>
+        calendar.render();
+    });
+</script>
 </body>
 
 </html>
