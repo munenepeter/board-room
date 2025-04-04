@@ -28,7 +28,7 @@ require_once 'includes/header.php';
                         FROM bookings b
                         JOIN boardrooms r ON b.room_id = r.room_id AND b.start_time >= DATETIME('now')
                         ORDER BY b.start_time ASC
-                        LIMIT 5
+                        LIMIT 3
                     ");
                     $upcoming_bookings->execute();
 
