@@ -19,10 +19,10 @@ if (isset($_POST['cancel_booking'])) {
 // Fetch user's bookings with event details
 $query = "SELECT b.booking_id, b.event_name, b.start_time, b.end_time, b.status,
                  r.room_name, r.location, r.capacity,
-                 e.event_description, e.attendees_count
+                --  e.event_description, e.attendees_count
           FROM bookings b
           JOIN boardrooms r ON b.room_id = r.room_id
-          LEFT JOIN events e ON b.booking_id = e.booking_id
+        --   LEFT JOIN events e ON b.booking_id = e.booking_id
           WHERE b.user_id = :user_id
           ORDER BY b.start_time DESC";
 
