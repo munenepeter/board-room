@@ -124,11 +124,8 @@ require_once 'includes/header.php';
         </div>
     </div>
 </div>
-
 <!-- FullCalendar Styles and Script -->
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
-
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
 <script>
@@ -137,6 +134,18 @@ require_once 'includes/header.php';
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             height: 'auto',
+            
+            // Disable weekends by setting these properties
+            //weekends: false, // This hides Saturday and Sunday completely
+            
+            weekends: true,
+            dayCellClassNames: function(arg) {
+                if (arg.date.getDay() === 0 || arg.date.getDay() === 6) { // Sunday or Saturday
+                    return 'fc-day-disabled';
+                }
+                return '';
+            },
+            
             events: [
                 <?php
                 $calendar_bookings = $db->prepare("
@@ -169,6 +178,26 @@ require_once 'includes/header.php';
                 }
                 ?>
             ],
+            
+            // Add validation for any event interactions
+            selectAllow: function(selectInfo) {
+                const start = selectInfo.start;
+                const end = selectInfo.end;
+                
+                // Prevent selection of weekends
+                if (start.getDay() === 0 || start.getDay() === 6 || 
+                    end.getDay() === 0 || end.getDay() === 6) {
+                    return false;
+                }
+                
+                return true;
+            },
+            
+            // Make dates non-selectable if they're weekends
+            selectConstraint: {
+                daysOfWeek: [1, 2, 3, 4, 5] // Only allow Monday-Friday (1-5)
+            },
+            
             eventClick: function(info) {
                 // You could show a modal here instead of an alert
                 alert(
@@ -185,7 +214,8 @@ require_once 'includes/header.php';
             },
             views: {
                 timeGridWeek: {
-                    titleFormat: { year: 'numeric', month: 'short', day: 'numeric' }
+                    titleFormat: { year: 'numeric', month: 'short', day: 'numeric' },
+                    weekends: false // Disable weekends in week view too
                 },
                 timeGridDay: {
                     titleFormat: { year: 'numeric', month: 'short', day: 'numeric' }
@@ -200,6 +230,16 @@ require_once 'includes/header.php';
         calendar.render();
     });
 </script>
+
+<!-- Add this style if you're using the alternative approach to display but disable weekends -->
+<style>
+    .fc-day-disabled {
+        background-color: #f1f1f1 !important;
+        color: #ccc !important;
+        pointer-events: none;
+        opacity: 0.6;
+    }
+</style>
 </body>
 
 </html>
