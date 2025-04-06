@@ -56,12 +56,48 @@ if ($isLoggedIn) {
             }
         }
     </script>
-     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-     <style>
-    [x-cloak] {
-        display: none !important;
-    }
-</style>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        .origin-top-right {
+            transition: all 0.2s ease;
+        }
+
+        .scale-95 {
+            transform: scale(0.95);
+        }
+
+        .scale-100 {
+            transform: scale(1);
+        }
+
+        .opacity-0 {
+            opacity: 0;
+        }
+
+        .opacity-100 {
+            opacity: 1;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50">
@@ -99,77 +135,90 @@ if ($isLoggedIn) {
                 </div>
 
                 <!-- Right Nav -->
-                <div class="hidden sm:ml-6 sm:flex sm:items-center">
-                    <?php if ($isLoggedIn): ?>
-                        <!-- Notifications -->
-                        <div class="ml-3 relative">
-                            <div class="relative">
-                                <button id="notifications-button" class="p-1 rounded-full text-white hover:text-gold-400 focus:outline-none">
-                                    <span class="sr-only">View notifications</span>
-                                    <i class="fas fa-bell h-6 w-6"></i>
-                                    <?php if ($unreadNotifications > 0): ?>
-                                        <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full">
-                                            <?= $unreadNotifications ?>
-                                        </span>
-                                    <?php endif; ?>
-                                </button>
+                
+                <div class="hidden sm:ml-6 sm:flex sm:items-center justify-between">
+    <?php if ($isLoggedIn): ?>
+        <!-- Notifications -->
+        <div class="ml-3 relative">
+            <div class="relative">
+                <button id="notifications-button" class="p-1 rounded-full text-white hover:text-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:ring-offset-2 focus:ring-offset-maroon-800 transition-all duration-200">
+                    <span class="sr-only">View notifications</span>
+                    <i class="fas fa-bell h-6 w-6"></i>
+                    <?php if ($unreadNotifications > 0): ?>
+                        <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full animate-pulse">
+                            <?= $unreadNotifications ?>
+                        </span>
+                    <?php endif; ?>
+                </button>
+            </div>
+
+            <!-- Notifications dropdown -->
+            <div id="notifications-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-80 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-200 z-50 transition-all duration-200 ease-out transform scale-95 opacity-0">
+                <div class="py-1">
+                    <div class="flex items-center justify-between px-4 py-2 bg-gray-50 rounded-t-md">
+                        <h3 class="text-sm font-medium text-gray-700">Notifications</h3>
+                        <?php if ($unreadNotifications > 0): ?>
+                            <a href="mark_all_read.php" class="text-xs text-maroon-600 hover:text-maroon-800">Mark all as read</a>
+                        <?php endif; ?>
+                    </div>
+                    <div class="max-h-64 overflow-y-auto">
+                        <?php
+                        $stmt = $db->prepare("SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 5");
+                        $stmt->execute([$userId]);
+                        $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                        if (empty($notifications)): ?>
+                            <div class="flex items-center justify-center py-6">
+                                <span class="text-sm text-gray-500">No notifications</span>
                             </div>
-
-                            <!-- Notifications dropdown -->
-                            <div id="notifications-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-80 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-200 z-50">
-                                <div class="py-1">
-                                    <h3 class="px-4 py-2 text-sm font-medium text-gray-700">Notifications</h3>
-                                    <?php
-                                    $stmt = $db->prepare("SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 5");
-                                    $stmt->execute([$userId]);
-                                    $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                                    if (empty($notifications)): ?>
-                                        <a href="#" class="block px-4 py-2 text-sm text-gray-500">No notifications</a>
-                                    <?php else: ?>
-                                        <?php foreach ($notifications as $notification): ?>
-                                            <a href="notification.php?id=<?= $notification['notification_id'] ?>" class="block px-4 py-2 text-sm <?= $notification['is_read'] ? 'text-gray-600' : 'font-bold text-gray-900' ?> hover:bg-gray-100">
-                                                <div class="font-medium"><?= $notification['title'] ?></div>
-                                                <div class="text-gray-500 truncate"><?= substr($notification['message'], 0, 50) ?>...</div>
-                                            </a>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                    <div class="border-t border-gray-200"></div>
-                                    <a href="notifications.php" class="block text-center px-4 py-2 text-sm text-maroon-700 font-medium hover:bg-gray-100">View all notifications</a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- User dropdown -->
-                        <div class="ml-3 relative">
-                            <div>
-                                <button id="user-menu-button" class="flex text-sm rounded-full focus:outline-none">
-                                    <span class="sr-only">Open user menu</span>
-                                    <div class="h-8 w-8 rounded-full bg-maroon-700 text-white flex items-center justify-center">
-                                        <?= strtoupper(substr($_SESSION['first_name'], 0, 1)) ?>
+                        <?php else: ?>
+                            <?php foreach ($notifications as $notification): ?>
+                                <a href="notification.php?id=<?= $notification['notification_id'] ?>" class="block px-4 py-3 text-sm hover:bg-gray-100 transition-colors duration-150 border-l-4 <?= $notification['is_read'] ? 'border-transparent' : 'border-maroon-500' ?>">
+                                    <div class="flex justify-between">
+                                        <span class="<?= $notification['is_read'] ? 'text-gray-600' : 'font-bold text-gray-900' ?>"><?= $notification['title'] ?></span>
+                                        <span class="text-xs text-gray-500"><?= $notification['created_at'] ?></span>
                                     </div>
-                                </button>
-                            </div>
+                                    <div class="text-gray-500 truncate mt-1"><?= substr($notification['message'], 0, 50) ?>...</div>
+                                </a>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                    <div class="border-t border-gray-200"></div>
+                    <a href="notifications.php" class="block text-center px-4 py-2 text-sm text-maroon-700 font-medium hover:bg-gray-100 transition-colors duration-150">View all notifications</a>
+                </div>
+            </div>
+        </div>
 
-                            <!-- User dropdown menu -->
-                            <div id="user-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 py-1 z-50">
-                                <div class="px-4 py-2 text-sm text-gray-700">
-                                    <div>Signed in as</div>
-                                    <div class="font-medium truncate"><?= $_SESSION['first_name'] . ' ' . $_SESSION['last_name'] ?></div>
-                                </div>
-                                <a href="profile.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    <i class="fas fa-user mr-2"></i> Profile
-                                </a>
-                                <a href="my_bookings.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    <i class="fas fa-calendar-alt mr-2"></i> My Bookings
-                                </a>
-                                <div class="border-t border-gray-200"></div>
-                                <a href="logout.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
-                                </a>
-                            </div>
-                        </div>
-                    <?php else: ?>
+        <!-- User dropdown -->
+        <div class="ml-3 relative">
+            <div>
+                <button id="user-menu-button" class="flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-gold-400 focus:ring-offset-2 focus:ring-offset-maroon-800 transition-all duration-200">
+                    <span class="sr-only">Open user menu</span>
+                    <div class="h-8 w-8 rounded-full bg-maroon-700 text-white flex items-center justify-center hover:bg-maroon-600 transition-colors duration-200">
+                        <?= strtoupper(substr($_SESSION['first_name'], 0, 1)) ?>
+                    </div>
+                </button>
+            </div>
+
+            <!-- User dropdown menu -->
+            <div id="user-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 py-1 z-50 transition-all duration-200 ease-out transform scale-95 opacity-0">
+                <div class="px-4 py-3 text-sm text-gray-700 border-b border-gray-200">
+                    <div class="text-xs text-gray-500">Signed in as</div>
+                    <div class="font-medium truncate"><?= $_SESSION['first_name'] . ' ' . $_SESSION['last_name'] ?></div>
+                </div>
+                <a href="profile.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                    <i class="fas fa-user mr-2 text-gray-500"></i> Profile
+                </a>
+                <a href="my_bookings.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                    <i class="fas fa-calendar-alt mr-2 text-gray-500"></i> My Bookings
+                </a>
+                <div class="border-t border-gray-200"></div>
+                <a href="logout.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                    <i class="fas fa-sign-out-alt mr-2 text-gray-500"></i> Logout
+                </a>
+            </div>
+        </div>
+    <?php else: ?>
                         <a href="login.php" class="text-white hover:text-gold-400 px-3 py-2 rounded-md text-sm font-medium">
                             <i class="fas fa-sign-in-alt mr-1"></i> Login
                         </a>
@@ -246,6 +295,72 @@ if ($isLoggedIn) {
             </div>
         </div>
     </nav>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to handle dropdown visibility
+            function setupDropdown(buttonId, dropdownId) {
+                const button = document.getElementById(buttonId);
+                const dropdown = document.getElementById(dropdownId);
+
+                if (!button || !dropdown) return;
+
+                // Toggle dropdown when button is clicked
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+
+                    // Close any other open dropdowns
+                    document.querySelectorAll('.origin-top-right:not(.hidden)').forEach(function(element) {
+                        if (element.id !== dropdownId) {
+                            element.classList.add('hidden', 'scale-95', 'opacity-0');
+                            element.classList.remove('scale-100', 'opacity-100');
+                        }
+                    });
+
+                    // Toggle this dropdown with animation
+                    const isHidden = dropdown.classList.contains('hidden');
+
+                    if (isHidden) {
+                        dropdown.classList.remove('hidden');
+                        // Force a reflow to ensure the transition happens
+                        void dropdown.offsetWidth;
+                        dropdown.classList.remove('scale-95', 'opacity-0');
+                        dropdown.classList.add('scale-100', 'opacity-100');
+                    } else {
+                        dropdown.classList.remove('scale-100', 'opacity-100');
+                        dropdown.classList.add('scale-95', 'opacity-0');
+
+                        // After transition completes, hide the element
+                        setTimeout(() => {
+                            dropdown.classList.add('hidden');
+                        }, 200); // Match the duration in the CSS
+                    }
+                });
+
+                // Close dropdown when clicking elsewhere on the page
+                document.addEventListener('click', function(e) {
+                    if (!dropdown.contains(e.target) && !button.contains(e.target)) {
+                        dropdown.classList.remove('scale-100', 'opacity-100');
+                        dropdown.classList.add('scale-95', 'opacity-0');
+
+                        setTimeout(() => {
+                            dropdown.classList.add('hidden');
+                        }, 200);
+                    }
+                });
+            }
+
+            // Setup both dropdowns
+            setupDropdown('notifications-button', 'notifications-dropdown');
+            setupDropdown('user-menu-button', 'user-dropdown');
+
+            // Helper function for notification time formatting (you'll need to implement this)
+            function time_elapsed_string(datetime) {
+                // This is just a placeholder - implement proper time formatting logic here
+                return "Just now";
+            }
+        });
+    </script>
 
     <div class="flex">
         <!-- Sidebar -->
