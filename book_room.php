@@ -37,24 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception("End time must be after start time");
         }
 
-        // Check room availability
-        $stmt = $db->prepare("
-            SELECT COUNT(*) FROM bookings 
-            WHERE room_id = :room_id 
-            AND status IN ('Pending', 'Approved')
-            AND (
-                (start_time < :end_time AND end_time > :start_time)
-            )
-        ");
-        $stmt->execute([
-            ':room_id' => $roomId,
-            ':start_time' => $startDateTime->format('Y-m-d H:i:s'),
-            ':end_time' => $endDateTime->format('Y-m-d H:i:s')
-        ]);
 
-        if ($stmt->fetchColumn() > 0) {
-            throw new Exception("The selected room is not available for the requested time slot");
-        }
 
         // Insert booking
         $stmt = $db->prepare("
@@ -162,7 +145,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Redirect to success page
         $_SESSION['success_message'] = "Your booking has been successfully submitted!";
-        header("Location: booking_success.php?id={$bookingId}");
+        if (!headers_sent()) {
+            header("Location: booking_success.php?id={$bookingId}");
+        } else {
+            echo "<script>window.location.href = 'booking_success.php?id={$bookingId}';</script>";
+        }
         exit;
     } catch (Exception $e) {
         $db->rollBack();
@@ -284,89 +271,213 @@ $defaultEnd = (new DateTime('+2 hours'))->format('Y-m-d\TH:i');
 </main>
 
 <script>
-    // Check room capacity vs attendees
-    document.getElementById('attendees_count').addEventListener('change', checkCapacity);
-    document.getElementById('room_id').addEventListener('change', checkCapacity);
+    // Add this JavaScript to your page
+    document.addEventListener('DOMContentLoaded', function() {
+        const startTimeInput = document.getElementById('start_time');
+        const endTimeInput = document.getElementById('end_time');
+        const availabilityStatus = document.getElementById('availability-status');
+        const availabilityText = document.getElementById('availability-text');
 
-    function checkCapacity() {
-        const roomSelect = document.getElementById('room_id');
-        const attendeesInput = document.getElementById('attendees_count');
-        const warning = document.getElementById('capacity-warning');
+        // Function to check if a date is a weekend
+        function isWeekend(date) {
+            const day = date.getDay();
+            return day === 0 || day === 6; // 0 is Sunday, 6 is Saturday
+        }
 
-        if (roomSelect.selectedIndex > 0 && attendeesInput.value) {
-            const capacity = roomSelect.options[roomSelect.selectedIndex].dataset.capacity;
-            if (parseInt(attendeesInput.value) > parseInt(capacity)) {
-                warning.classList.remove('hidden');
+        // Function to show error message
+        function showError(message) {
+            availabilityStatus.classList.remove('hidden', 'bg-green-100', 'text-green-800');
+            availabilityStatus.classList.add('bg-red-100', 'text-red-800');
+            availabilityText.textContent = message;
+            availabilityStatus.classList.remove('hidden');
+        }
+
+        // Function to show success message
+        function showSuccess(message) {
+            availabilityStatus.classList.remove('hidden', 'bg-red-100', 'text-red-800');
+            availabilityStatus.classList.add('bg-green-100', 'text-green-800');
+            availabilityText.textContent = message;
+            availabilityStatus.classList.remove('hidden');
+        }
+
+        // Function to hide status message
+        function hideStatus() {
+            availabilityStatus.classList.add('hidden');
+        }
+
+        // Function to get current date and time in local ISO format
+        function getCurrentDateTime() {
+            const now = new Date();
+            // Format as YYYY-MM-DDThh:mm
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        // Set minimum date/time to now for both inputs
+        const now = getCurrentDateTime();
+        startTimeInput.setAttribute('min', now);
+        endTimeInput.setAttribute('min', now);
+
+        // Function to validate the selected date
+        function validateDate(input) {
+            if (input.value) {
+                const selectedDate = new Date(input.value);
+                const currentDate = new Date();
+
+                // Check if date is in the past
+                if (selectedDate < currentDate) {
+                    showError('You cannot select a date/time in the past. Please choose a future date/time.');
+                    input.value = '';
+                    return false;
+                }
+
+                // Check if date is a weekend
+                if (isWeekend(selectedDate)) {
+                    showError('Weekends are not available for selection. Please choose a weekday.');
+                    input.value = '';
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Function to validate end time is after start time
+        function validateTimeRange() {
+            if (startTimeInput.value && endTimeInput.value) {
+                const startDate = new Date(startTimeInput.value);
+                const endDate = new Date(endTimeInput.value);
+
+                if (endDate <= startDate) {
+                    showError('End time must be after start time.');
+                    endTimeInput.value = '';
+                    return false;
+                } else {
+                    showSuccess('Time range is valid.');
+                    return true;
+                }
+            }
+            return true;
+        }
+
+        // Add validation to the inputs
+        startTimeInput.addEventListener('change', function() {
+            hideStatus();
+            if (validateDate(startTimeInput)) {
+                // If end time is already set, validate the range
+                if (endTimeInput.value) {
+                    validateTimeRange();
+                }
+
+                // Update minimum end time to be at least the start time
+                if (startTimeInput.value) {
+                    endTimeInput.setAttribute('min', startTimeInput.value);
+                }
+            }
+        });
+
+        endTimeInput.addEventListener('change', function() {
+            hideStatus();
+            if (validateDate(endTimeInput)) {
+                validateTimeRange();
+            }
+        });
+
+        // Initialize: Make sure end time min is set to start time value if present
+        if (startTimeInput.value) {
+            endTimeInput.setAttribute('min', startTimeInput.value);
+        }
+
+
+
+        // Check room capacity vs attendees
+        document.getElementById('attendees_count').addEventListener('change', checkCapacity);
+        document.getElementById('room_id').addEventListener('change', checkCapacity);
+
+        function checkCapacity() {
+            const roomSelect = document.getElementById('room_id');
+            const attendeesInput = document.getElementById('attendees_count');
+            const warning = document.getElementById('capacity-warning');
+
+            if (roomSelect.selectedIndex > 0 && attendeesInput.value) {
+                const capacity = roomSelect.options[roomSelect.selectedIndex].dataset.capacity;
+                if (parseInt(attendeesInput.value) > parseInt(capacity)) {
+                    warning.classList.remove('hidden');
+                } else {
+                    warning.classList.add('hidden');
+                }
             } else {
                 warning.classList.add('hidden');
             }
-        } else {
-            warning.classList.add('hidden');
         }
-    }
 
-    // Check room availability when time changes
-    document.getElementById('start_time').addEventListener('change', checkAvailability);
-    document.getElementById('end_time').addEventListener('change', checkAvailability);
-    document.getElementById('room_id').addEventListener('change', checkAvailability);
+        // Check room availability when time changes
+        document.getElementById('start_time').addEventListener('change', checkAvailability);
+        document.getElementById('end_time').addEventListener('change', checkAvailability);
+        document.getElementById('room_id').addEventListener('change', checkAvailability);
 
-    function checkAvailability() {
-        const roomId = document.getElementById('room_id').value;
-        const startTime = document.getElementById('start_time').value;
-        const endTime = document.getElementById('end_time').value;
-        const statusDiv = document.getElementById('availability-status');
-        const statusText = document.getElementById('availability-text');
+        function checkAvailability() {
+            const roomId = document.getElementById('room_id').value;
+            const startTime = document.getElementById('start_time').value;
+            const endTime = document.getElementById('end_time').value;
+            const statusDiv = document.getElementById('availability-status');
+            const statusText = document.getElementById('availability-text');
 
-        if (!roomId || !startTime || !endTime) return;
+            if (!roomId || !startTime || !endTime) return;
 
-        // Simple client-side validation for time order
-        if (new Date(startTime) >= new Date(endTime)) {
-            statusDiv.className = 'bg-red-50 text-red-700 p-3 rounded-md text-sm';
-            statusText.textContent = 'End time must be after start time';
+            // Simple client-side validation for time order
+            if (new Date(startTime) >= new Date(endTime)) {
+                statusDiv.className = 'bg-red-50 text-red-700 p-3 rounded-md text-sm';
+                statusText.textContent = 'End time must be after start time';
+                statusDiv.classList.remove('hidden');
+                return;
+            }
+
+            // Show loading
+            statusDiv.className = 'bg-blue-50 text-blue-700 p-3 rounded-md text-sm';
+            statusText.textContent = 'Checking availability...';
             statusDiv.classList.remove('hidden');
-            return;
-        }
 
-        // Show loading
-        statusDiv.className = 'bg-blue-50 text-blue-700 p-3 rounded-md text-sm';
-        statusText.textContent = 'Checking availability...';
-        statusDiv.classList.remove('hidden');
-
-        // AJAX request to check availability
-        fetch('check_availability.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    room_id: roomId,
-                    start_time: startTime,
-                    end_time: endTime,
-                    exclude_booking: '' // For edit scenarios
+            // AJAX request to check availability
+            fetch('check_availability.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        room_id: roomId,
+                        start_time: startTime,
+                        end_time: endTime,
+                        exclude_booking: '' // For edit scenarios
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.available) {
-                    statusDiv.className = 'bg-green-50 text-green-700 p-3 rounded-md text-sm';
-                    statusText.textContent = 'Room is available for the selected time';
-                } else {
-                    statusDiv.className = 'bg-red-50 text-red-700 p-3 rounded-md text-sm';
-                    statusText.textContent = 'Room is not available for the selected time';
-                    if (data.conflicting_event) {
-                        const conflict = data.conflicting_event;
-                        statusText.textContent += ` (Conflicts with "${conflict.event_name}" from ${conflict.start_time} to ${conflict.end_time})`;
+                .then(response => response.json())
+                .then(data => {
+                    if (data.available) {
+                        statusDiv.className = 'bg-green-50 text-green-700 p-3 rounded-md text-sm';
+                        statusText.textContent = 'Room is available for the selected time';
+                    } else {
+                        statusDiv.className = 'bg-red-50 text-red-700 p-3 rounded-md text-sm';
+                        statusText.textContent = 'Room is not available for the selected time';
+                        if (data.conflicting_event) {
+                            const conflict = data.conflicting_event;
+                            statusText.textContent += ` (Conflicts with "${conflict.event_name}" from ${conflict.start_time} to ${conflict.end_time})`;
+                        }
                     }
-                }
-                statusDiv.classList.remove('hidden');
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                statusDiv.className = 'bg-yellow-50 text-yellow-700 p-3 rounded-md text-sm';
-                statusText.textContent = 'Error checking availability';
-                statusDiv.classList.remove('hidden');
-            });
-    }
+                    statusDiv.classList.remove('hidden');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    statusDiv.className = 'bg-yellow-50 text-yellow-700 p-3 rounded-md text-sm';
+                    statusText.textContent = 'Error checking availability';
+                    statusDiv.classList.remove('hidden');
+                });
+        }
+    });
 </script>
 
 </body>

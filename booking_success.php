@@ -3,6 +3,7 @@ require_once 'includes/header.php';
 require_once 'includes/functions.php';
 
 
+
 // Check if booking ID is provided
 if (!isset($_GET['id'])) {
     header("Location: bookings.php");
@@ -16,9 +17,9 @@ $stmt = $db->prepare("
     SELECT b.*, r.room_name, r.location 
     FROM bookings b
     JOIN boardrooms r ON b.room_id = r.room_id
-    WHERE b.booking_id = :id AND b.user_id = :user_id
+    WHERE b.booking_id = ? AND b.user_id = ?
 ");
-$stmt->execute([':id' => $bookingId, ':user_id' => $userId]);
+$stmt->execute([$bookingId, $userId]);
 $booking = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$booking) {
@@ -42,7 +43,7 @@ $endDateTime = new DateTime($booking['end_time']);
                     <div class="ml-3">
                         <h3 class="text-sm font-medium text-green-800"><?= $_SESSION['success_message'] ?></h3>
                         <div class="mt-2 text-sm text-green-700">
-                            <p>Your booking details are shown below. A confirmation has been sent to your email.</p>
+                            <p>Your booking details are shown below.</p>
                         </div>
                     </div>
                 </div>
@@ -88,8 +89,34 @@ $endDateTime = new DateTime($booking['end_time']);
                     </div>
                 </div>
                 
+                <?php if ($booking['status'] === 'Approved'): ?>
                 <div class="sm:col-span-2">
-                    <h2 class="text-lg font-medium text-maroon-700 mb-2">Next Steps</h2>
+                    <h2 class="text-lg font-medium text-maroon-700 mb-2">Add to Calendar</h2>
+                    <div class="flex flex-wrap gap-3">
+                        <!-- Google Calendar -->
+                        <a href="<?= generateGoogleCalendarLink($booking) ?>" 
+                           target="_blank"
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-maroon-500">
+                            <i class="fa-brands fa-google text-blue-500 mr-2"></i> Add to Google Calendar
+                        </a>
+                        
+                        <!-- Outlook Calendar -->
+                        <a href="<?= generateOutlookCalendarLink($booking) ?>" 
+                           target="_blank"
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-maroon-500">
+                            <i class="fab fa-microsoft text-blue-500 mr-2"></i> Add to Outlook
+                        </a>
+                        
+                        <!-- iCal Download -->
+                        <a href="download_ical.php?id=<?= $bookingId ?>" 
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-maroon-500">
+                            <i class="fas fa-calendar-alt text-maroon-500 mr-2"></i> Download .ics File
+                        </a>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
+                <div class="sm:col-span-2 pt-4">
                     <div class="bg-blue-50 rounded-md p-4">
                         <?php if ($booking['status'] === 'Pending'): ?>
                         <p class="text-blue-700">Your booking is pending approval. You'll receive an email notification once it's been reviewed by an administrator.</p>
@@ -111,5 +138,7 @@ $endDateTime = new DateTime($booking['end_time']);
         </div>
     </div>
 </main>
+
+
 </body>
 </html>
