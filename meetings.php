@@ -1,5 +1,6 @@
 <?php
 require_once 'includes/header.php';
+require_once 'includes/functions.php';
 
 // Check if user is logged in
 if (!$isLoggedIn) {
@@ -63,7 +64,11 @@ function handleBookingAction($action, $bookingId) {
         }
 
         $db->commit();
-        header("Location: meetings.php");
+        if (!headers_sent()) {
+            header("Location: meetings.php");
+        } else {
+            echo '<script>window.location.href = "meetings.php";</script>';
+        }
         exit;
     } catch (Exception $e) {
         $db->rollBack();
@@ -107,6 +112,36 @@ $stmt = $db->prepare($query);
 $stmt->execute($params);
 $meetings = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
+<!-- Details Modal -->
+<div id="detailsModal" class="fixed inset-0 z-10 hidden overflow-y-auto" aria-hidden="true">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Background overlay -->
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+
+        <!-- Modal panel -->
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="flex justify-between items-center pb-3 border-b border-gray-200">
+                    <h5 id="detailsModalTitle" class="text-lg font-medium text-gray-900">Booking Details</h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-500 focus:outline-none" aria-label="Close">
+                        <span aria-hidden="true" class="text-2xl">&times;</span>
+                    </button>
+                </div>
+                <div id="detailsModalBody" class="mt-3">
+                    <!-- Content will be loaded via AJAX -->
+                </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button aria-label="Close" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-maroon-500 sm:mt-0 sm:w-auto sm:text-sm">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <main class="py-6 px-4 sm:px-6 lg:px-8" x-data="modal">
     <div class="max-w-7xl mx-auto">
@@ -219,11 +254,11 @@ $meetings = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex justify-end space-x-2">
-                                            <a href="booking_details.php?id=<?= $meeting['booking_id'] ?>"
+                                            <button type="button" onclick="showDetailsModal(<?= $meeting['booking_id'] ?>)"
                                                 class="text-maroon-600 hover:text-maroon-900"
                                                 title="View Details">
                                                 <i class="fas fa-eye"></i>
-                                            </a>
+                                            </button>
 
                                             <?php if ($isMyBooking || $userRole === 'admin'): ?>
                                                 <?php if ($meeting['status'] === 'Pending' || $meeting['status'] === 'Approved'): ?>
@@ -377,6 +412,91 @@ $meetings = $stmt->fetchAll(PDO::FETCH_ASSOC);
             }
         }));
     });
+</script>
+
+<script>
+    // Function to show a modal by ID
+    function showModal(modalId) {
+        document.getElementById(modalId).classList.remove('hidden');
+    }
+
+    // Function to hide a modal by ID
+    function hideModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+    }
+
+    // Initialize event listeners for all close buttons
+    function initModalCloseButtons() {
+        // Get all modals
+        const modals = ['detailsModal'];
+
+        // For each modal, add click event listener to its close button
+        modals.forEach(modalId => {
+            const modal = document.getElementById(modalId);
+
+            // Add event listener to close button
+            const closeButton = modal.querySelector('button[aria-label="Close"]');
+            if (closeButton) {
+                closeButton.addEventListener('click', function() {
+                    hideModal(modalId);
+                });
+            }
+
+            // Add event listener to cancel button
+            const cancelButton = modal.querySelector('button:not([type="submit"])');
+            if (cancelButton) {
+                cancelButton.addEventListener('click', function() {
+                    hideModal(modalId);
+                });
+            }
+
+            // Add click event to background overlay for closing
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    hideModal(modalId);
+                }
+            });
+        });
+    }
+
+    // Initialize on document ready
+    $(document).ready(function() {
+        initModalCloseButtons();
+    });
+
+    // Show approve modal with booking ID
+    function showApproveModal(bookingId) {
+        $('#approveBookingId').val(bookingId);
+        showModal('approvalModal');
+    }
+
+    // Show reject modal with booking ID
+    function showRejectModal(bookingId) {
+        $('#rejectBookingId').val(bookingId);
+        showModal('rejectionModal');
+    }
+
+    // Show details modal with booking details loaded via AJAX
+    function showDetailsModal(bookingId) {
+        $('#detailsModalTitle').text('Loading...');
+        $('#detailsModalBody').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i></div>');
+        showModal('detailsModal');
+
+        $.ajax({
+            url: 'ajax/get_booking_details.php',
+            type: 'GET',
+            data: {
+                id: bookingId
+            },
+            success: function(response) {
+                $('#detailsModalTitle').text('Booking Details');
+                $('#detailsModalBody').html(response);
+            },
+            error: function() {
+                $('#detailsModalBody').html('<div class="text-center py-4 text-red-500">Failed to load booking details.</div>');
+            }
+        });
+    }
 </script>
 
 </body>

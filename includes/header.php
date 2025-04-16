@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'db.php';
+require_once 'database/db.php';
 require_once 'includes/auth.php';
 
 if (!isLoggedIn()) {
@@ -19,6 +19,38 @@ if ($isLoggedIn) {
     $stmt = $db->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0");
     $stmt->execute([$userId]);
     $unreadNotifications = $stmt->fetchColumn();
+}
+function time_elapsed_string($datetime, $full = false) {
+    $now = new DateTime;
+    $ago = new DateTime($datetime);
+    $diff = $now->diff($ago);
+
+    $diff->w = floor($diff->d / 7);
+    $diff->d -= $diff->w * 7;
+
+    $string = array(
+        'y' => 'year',
+        'm' => 'month',
+        'w' => 'week',
+        'd' => 'day',
+        'h' => 'hour',
+        'i' => 'minute',
+        's' => 'second',
+    );
+
+    foreach ($string as $k => &$v) {
+        if ($diff->$k) {
+            $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');
+        } else {
+            unset($string[$k]);
+        }
+    }
+
+    if (!$full) {
+        $string = array_slice($string, 0, 1);
+    }
+
+    return $string ? implode(', ', $string) . ' ago' : 'just now';
 }
 ?>
 <!DOCTYPE html>
@@ -45,222 +77,220 @@ if ($isLoggedIn) {
                             600: '#e02424',
                             700: '#c81e1e',
                             800: '#9b1c1c',
-                            900: '#800000', // Primary maroon
+                            900: '#800000',
                         },
                         gold: {
                             400: '#FFD700',
                             500: '#e6b800',
                         }
+                    },
+                    transitionProperty: {
+                        'height': 'height',
+                        'spacing': 'margin, padding',
                     }
                 }
             }
         }
     </script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         [x-cloak] {
             display: none !important;
         }
 
-        .origin-top-right {
-            transition: all 0.2s ease;
+        .animate-fade-in {
+            animation: fadeIn 0.2s ease-out;
         }
 
-        .scale-95 {
-            transform: scale(0.95);
+        .animate-fade-out {
+            animation: fadeOut 0.2s ease-out;
         }
 
-        .scale-100 {
-            transform: scale(1);
-        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
 
-        .opacity-0 {
-            opacity: 0;
-        }
-
-        .opacity-100 {
-            opacity: 1;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
+            to {
                 opacity: 1;
-            }
-
-            50% {
-                opacity: 0.7;
+                transform: translateY(0);
             }
         }
 
-        .animate-pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+        }
+
+        .notification-badge {
+            box-shadow: 0 0 0 2px #800000;
         }
     </style>
 </head>
 
-<body class="bg-gray-50">
+<body class="bg-gray-50 antialiased">
     <!-- Navigation -->
-    <nav class="bg-maroon-900 shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav class="bg-maroon-900 shadow-sm sticky top-0 z-50">
+        <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
-                <div class="flex items-center justify-start">
+                <!-- Logo and mobile menu button -->
+                <div class="flex items-center">
+                    <!-- Mobile menu button -->
+                    <button id="mobile-menu-button" class="md:hidden text-gray-200 hover:text-white focus:outline-none mr-2">
+                        <span class="sr-only">Open main menu</span>
+                        <i class="fas fa-bars h-6 w-6"></i>
+                    </button>
+
                     <!-- Logo -->
                     <div class="flex-shrink-0 flex items-center">
-                        <a href="index.php" class="text-white text-xl font-bold">
-                            <i class="fas fa-calendar-check mr-2"></i> Meeting Room Reservation System
+                        <a href="index.php" class="flex items-center text-white text-lg font-semibold tracking-tight">
+                            <i class="fas fa-calendar-check mr-2 text-gold-400"></i>
+                            <span class="hidden sm:inline">Meeting Room</span>
+                            <span class="sm:hidden">MRS</span>
                         </a>
                     </div>
 
-                    <!-- Primary Nav -->
-                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                        <a href="rooms.php" class="text-white hover:text-gold-400 px-3 py-2 rounded-md text-sm font-medium">
+                    <!-- Desktop navigation -->
+                    <div class="hidden md:ml-8 md:flex md:space-x-1">
+                        <a href="rooms.php" class="px-3 py-2 rounded-md text-sm font-medium text-gray-200 hover:text-white hover:bg-maroon-800 transition-colors">
                             <i class="fas fa-door-open mr-1"></i> Rooms
                         </a>
-                        <a href="bookings.php" class="text-white hover:text-gold-400 px-3 py-2 rounded-md text-sm font-medium">
+                        <a href="bookings.php" class="px-3 py-2 rounded-md text-sm font-medium text-gray-200 hover:text-white hover:bg-maroon-800 transition-colors">
                             <i class="fas fa-calendar-plus mr-1"></i> Bookings
                         </a>
                         <?php if ($isLoggedIn && in_array($userRole, ['approver', 'admin'])): ?>
-                            <a href="approvals.php" class="text-white hover:text-gold-400 px-3 py-2 rounded-md text-sm font-medium">
+                            <a href="approvals.php" class="px-3 py-2 rounded-md text-sm font-medium text-gray-200 hover:text-white hover:bg-maroon-800 transition-colors">
                                 <i class="fas fa-check-circle mr-1"></i> Approvals
                             </a>
                         <?php endif; ?>
                         <?php if ($isLoggedIn && $userRole === 'admin'): ?>
-                            <a href="admin.php" class="text-white hover:text-gold-400 px-3 py-2 rounded-md text-sm font-medium">
+                            <a href="admin.php" class="px-3 py-2 rounded-md text-sm font-medium text-gray-200 hover:text-white hover:bg-maroon-800 transition-colors">
                                 <i class="fas fa-cog mr-1"></i> Admin
                             </a>
                         <?php endif; ?>
                     </div>
                 </div>
 
-                <!-- Right Nav -->
-                
-                <div class="hidden sm:ml-6 sm:flex sm:items-center justify-between">
-    <?php if ($isLoggedIn): ?>
-        <!-- Notifications -->
-        <div class="ml-3 relative">
-            <div class="relative">
-                <button id="notifications-button" class="p-1 rounded-full text-white hover:text-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:ring-offset-2 focus:ring-offset-maroon-800 transition-all duration-200">
-                    <span class="sr-only">View notifications</span>
-                    <i class="fas fa-bell h-6 w-6"></i>
-                    <?php if ($unreadNotifications > 0): ?>
-                        <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full animate-pulse">
-                            <?= $unreadNotifications ?>
-                        </span>
-                    <?php endif; ?>
-                </button>
-            </div>
+                <!-- Right side controls -->
+                <div class="flex items-center space-x-3">
+                    <?php if ($isLoggedIn): ?>
+                        <!-- Notifications -->
+                        <div class="relative">
+                            <button id="notifications-button" class="p-1 rounded-full text-gray-200 hover:text-white focus:outline-none relative">
+                                <span class="sr-only">View notifications</span>
+                                <i class="fas fa-bell h-5 w-5"></i>
+                                <?php if ($unreadNotifications > 0): ?>
+                                    <span class="absolute top-0 right-0 h-3 w-3 rounded-full bg-red-500 notification-badge flex items-center justify-center text-[8px] text-white">
+                                        <?= $unreadNotifications > 9 ? '9+' : $unreadNotifications ?>
+                                    </span>
+                                <?php endif; ?>
+                            </button>
 
-            <!-- Notifications dropdown -->
-            <div id="notifications-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-80 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-200 z-50 transition-all duration-200 ease-out transform scale-95 opacity-0">
-                <div class="py-1">
-                    <div class="flex items-center justify-between px-4 py-2 bg-gray-50 rounded-t-md">
-                        <h3 class="text-sm font-medium text-gray-700">Notifications</h3>
-                        <?php if ($unreadNotifications > 0): ?>
-                            <a href="mark_all_read.php" class="text-xs text-maroon-600 hover:text-maroon-800">Mark all as read</a>
-                        <?php endif; ?>
-                    </div>
-                    <div class="max-h-64 overflow-y-auto">
-                        <?php
-                        $stmt = $db->prepare("SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 5");
-                        $stmt->execute([$userId]);
-                        $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                        if (empty($notifications)): ?>
-                            <div class="flex items-center justify-center py-6">
-                                <span class="text-sm text-gray-500">No notifications</span>
-                            </div>
-                        <?php else: ?>
-                            <?php foreach ($notifications as $notification): ?>
-                                <a href="notification.php?id=<?= $notification['notification_id'] ?>" class="block px-4 py-3 text-sm hover:bg-gray-100 transition-colors duration-150 border-l-4 <?= $notification['is_read'] ? 'border-transparent' : 'border-maroon-500' ?>">
-                                    <div class="flex justify-between">
-                                        <span class="<?= $notification['is_read'] ? 'text-gray-600' : 'font-bold text-gray-900' ?>"><?= $notification['title'] ?></span>
-                                        <span class="text-xs text-gray-500"><?= $notification['created_at'] ?></span>
+                            <!-- Notifications dropdown -->
+                            <div id="notifications-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-80 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 z-50">
+                                <div class="py-1">
+                                    <div class="flex items-center justify-between px-4 py-2 bg-gray-50 rounded-t-lg">
+                                        <h3 class="text-sm font-medium text-gray-700">Notifications</h3>
+                                        <?php if ($unreadNotifications > 0): ?>
+                                            <a href="mark_all_read.php" class="text-xs text-maroon-600 hover:text-maroon-800">Mark all as read</a>
+                                        <?php endif; ?>
                                     </div>
-                                    <div class="text-gray-500 truncate mt-1"><?= substr($notification['message'], 0, 50) ?>...</div>
+                                    <div class="max-h-96 overflow-y-auto">
+                                        <?php
+                                        $stmt = $db->prepare("SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 5");
+                                        $stmt->execute([$userId]);
+                                        $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                                        if (empty($notifications)): ?>
+                                            <div class="flex items-center justify-center py-6">
+                                                <span class="text-sm text-gray-500">No notifications</span>
+                                            </div>
+                                        <?php else: ?>
+                                            <?php foreach ($notifications as $notification): ?>
+                                                <a href="notification.php?id=<?= $notification['notification_id'] ?>" class="block px-4 py-3 text-sm hover:bg-gray-50 transition-colors border-l-2 <?= $notification['is_read'] ? 'border-transparent' : 'border-maroon-500' ?>">
+                                                    <div class="flex justify-between">
+                                                        <span class="<?= $notification['is_read'] ? 'text-gray-600' : 'font-semibold text-gray-900' ?>"><?= $notification['title'] ?></span>
+                                                        <span class="text-xs text-gray-500"><?= time_elapsed_string($notification['created_at']) ?></span>
+                                                    </div>
+                                                    <div class="text-gray-500 mt-1 truncate"><?= substr($notification['message'], 0, 50) ?>...</div>
+                                                </a>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="border-t border-gray-200"></div>
+                                    <!-- <a href="notifications.php" class="block text-center px-4 py-2 text-sm text-maroon-700 font-medium hover:bg-gray-100 transition-colors">View all notifications</a> -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- User dropdown -->
+                        <div class="relative">
+                            <button id="user-menu-button" class="flex items-center text-sm rounded-full focus:outline-none">
+                                <span class="sr-only">Open user menu</span>
+                                <div class="h-8 w-8 rounded-full bg-maroon-700 text-white flex items-center justify-center hover:bg-maroon-600 transition-colors">
+                                    <?= strtoupper(substr($_SESSION['first_name'], 0, 1)) ?>
+                                </div>
+                                <span class="ml-2 text-sm font-medium text-gray-200 hidden lg:inline"><?= $_SESSION['first_name'] ?></span>
+                                <i class="fas fa-chevron-down ml-1 text-gray-300 text-xs hidden lg:inline"></i>
+                            </button>
+
+                            <!-- User dropdown menu -->
+                            <div id="user-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-56 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 py-1 z-50">
+                                <div class="px-4 py-3 border-b border-gray-100">
+                                    <p class="text-sm text-gray-500">Signed in as</p>
+                                    <p class="text-sm font-semibold text-gray-900 truncate"><?= $_SESSION['first_name'] . ' ' . $_SESSION['last_name'] ?></p>
+                                </div>
+                                <a href="bookings.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <i class="fas fa-calendar-alt mr-2 text-gray-500 w-4 text-center"></i> All Bookings
                                 </a>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </div>
-                    <div class="border-t border-gray-200"></div>
-                    <a href="notifications.php" class="block text-center px-4 py-2 text-sm text-maroon-700 font-medium hover:bg-gray-100 transition-colors duration-150">View all notifications</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- User dropdown -->
-        <div class="ml-3 relative">
-            <div>
-                <button id="user-menu-button" class="flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-gold-400 focus:ring-offset-2 focus:ring-offset-maroon-800 transition-all duration-200">
-                    <span class="sr-only">Open user menu</span>
-                    <div class="h-8 w-8 rounded-full bg-maroon-700 text-white flex items-center justify-center hover:bg-maroon-600 transition-colors duration-200">
-                        <?= strtoupper(substr($_SESSION['first_name'], 0, 1)) ?>
-                    </div>
-                </button>
-            </div>
-
-            <!-- User dropdown menu -->
-            <div id="user-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 py-1 z-50 transition-all duration-200 ease-out transform scale-95 opacity-0">
-                <div class="px-4 py-3 text-sm text-gray-700 border-b border-gray-200">
-                    <div class="text-xs text-gray-500">Signed in as</div>
-                    <div class="font-medium truncate"><?= $_SESSION['first_name'] . ' ' . $_SESSION['last_name'] ?></div>
-                </div>
-                <a href="profile.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
-                    <i class="fas fa-user mr-2 text-gray-500"></i> Profile
-                </a>
-                <a href="my_bookings.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
-                    <i class="fas fa-calendar-alt mr-2 text-gray-500"></i> My Bookings
-                </a>
-                <div class="border-t border-gray-200"></div>
-                <a href="logout.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
-                    <i class="fas fa-sign-out-alt mr-2 text-gray-500"></i> Logout
-                </a>
-            </div>
-        </div>
-    <?php else: ?>
-                        <a href="login.php" class="text-white hover:text-gold-400 px-3 py-2 rounded-md text-sm font-medium">
+                                <div class="border-t border-gray-100"></div>
+                                <a href="logout.php" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <i class="fas fa-sign-out-alt mr-2 text-gray-500 w-4 text-center"></i> Logout
+                                </a>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <a href="login.php" class="px-3 py-2 rounded-md text-sm font-medium text-gray-200 hover:text-white hover:bg-maroon-800 transition-colors">
                             <i class="fas fa-sign-in-alt mr-1"></i> Login
                         </a>
-                        <a href="register.php" class="text-white hover:text-gold-400 px-3 py-2 rounded-md text-sm font-medium">
+                        <a href="register.php" class="px-3 py-2 rounded-md text-sm font-medium text-white bg-maroon-700 hover:bg-maroon-600 transition-colors">
                             <i class="fas fa-user-plus mr-1"></i> Register
                         </a>
                     <?php endif; ?>
-                </div>
-
-                <!-- Mobile menu button -->
-                <div class="-mr-2 flex items-center sm:hidden">
-                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-gold-400 focus:outline-none">
-                        <span class="sr-only">Open main menu</span>
-                        <i class="fas fa-bars h-6 w-6"></i>
-                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Mobile menu -->
-        <div id="mobile-menu" class="hidden sm:hidden bg-maroon-800">
-            <div class="pt-2 pb-3 space-y-1">
-                <a href="rooms.php" class="text-white hover:bg-maroon-700 block px-3 py-2 rounded-md text-base font-medium">
+        <div id="mobile-menu" class="hidden md:hidden bg-maroon-800 transition-all duration-300 ease-in-out overflow-hidden">
+            <div class="pt-2 pb-3 space-y-1 px-2">
+                <a href="rooms.php" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-maroon-700 transition-colors">
                     <i class="fas fa-door-open mr-2"></i> Rooms
                 </a>
-                <a href="bookings.php" class="text-white hover:bg-maroon-700 block px-3 py-2 rounded-md text-base font-medium">
+                <a href="bookings.php" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-maroon-700 transition-colors">
                     <i class="fas fa-calendar-plus mr-2"></i> Bookings
                 </a>
                 <?php if ($isLoggedIn && in_array($userRole, ['approver', 'admin'])): ?>
-                    <a href="approvals.php" class="text-white hover:bg-maroon-700 block px-3 py-2 rounded-md text-base font-medium">
+                    <a href="approvals.php" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-maroon-700 transition-colors">
                         <i class="fas fa-check-circle mr-2"></i> Approvals
                     </a>
                 <?php endif; ?>
                 <?php if ($isLoggedIn && $userRole === 'admin'): ?>
-                    <a href="admin.php" class="text-white hover:bg-maroon-700 block px-3 py-2 rounded-md text-base font-medium">
+                    <a href="admin.php" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-maroon-700 transition-colors">
                         <i class="fas fa-cog mr-2"></i> Admin
                     </a>
                 <?php endif; ?>
             </div>
-            <div class="pt-4 pb-3 border-t border-maroon-700">
-                <?php if ($isLoggedIn): ?>
-                    <div class="flex items-center px-4">
+            <?php if ($isLoggedIn): ?>
+                <div class="pt-4 pb-3 border-t border-maroon-700 px-4">
+                    <div class="flex items-center">
                         <div class="flex-shrink-0">
                             <div class="h-10 w-10 rounded-full bg-maroon-600 text-white flex items-center justify-center">
                                 <?= strtoupper(substr($_SESSION['first_name'], 0, 1)) ?>
@@ -272,165 +302,138 @@ if ($isLoggedIn) {
                         </div>
                     </div>
                     <div class="mt-3 space-y-1">
-                        <a href="profile.php" class="block px-4 py-2 text-base font-medium text-white hover:bg-maroon-700">
+                        <a href="profile.php" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-maroon-700 transition-colors">
                             <i class="fas fa-user mr-2"></i> Profile
                         </a>
-                        <a href="my_bookings.php" class="block px-4 py-2 text-base font-medium text-white hover:bg-maroon-700">
+                        <a href="my_bookings.php" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-maroon-700 transition-colors">
                             <i class="fas fa-calendar-alt mr-2"></i> My Bookings
                         </a>
-                        <a href="logout.php" class="block px-4 py-2 text-base font-medium text-white hover:bg-maroon-700">
+                        <a href="logout.php" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-maroon-700 transition-colors">
                             <i class="fas fa-sign-out-alt mr-2"></i> Logout
                         </a>
                     </div>
-                <?php else: ?>
-                    <div class="mt-3 space-y-1">
-                        <a href="login.php" class="block px-4 py-2 text-base font-medium text-white hover:bg-maroon-700">
+                </div>
+            <?php else: ?>
+                <div class="pt-4 pb-3 border-t border-maroon-700 px-4">
+                    <div class="space-y-1">
+                        <a href="login.php" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-maroon-700 transition-colors">
                             <i class="fas fa-sign-in-alt mr-2"></i> Login
                         </a>
-                        <a href="register.php" class="block px-4 py-2 text-base font-medium text-white hover:bg-maroon-700">
+                        <a href="register.php" class="block px-3 py-2 rounded-md text-base font-medium text-white bg-maroon-700 hover:bg-maroon-600 transition-colors">
                             <i class="fas fa-user-plus mr-2"></i> Register
                         </a>
                     </div>
-                <?php endif; ?>
-            </div>
+                </div>
+            <?php endif; ?>
         </div>
     </nav>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Function to handle dropdown visibility
-            function setupDropdown(buttonId, dropdownId) {
+            // Mobile menu toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            mobileMenuButton.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Dropdown toggle functions
+            function toggleDropdown(buttonId, dropdownId) {
                 const button = document.getElementById(buttonId);
                 const dropdown = document.getElementById(dropdownId);
 
                 if (!button || !dropdown) return;
 
-                // Toggle dropdown when button is clicked
                 button.addEventListener('click', function(e) {
                     e.stopPropagation();
 
-                    // Close any other open dropdowns
-                    document.querySelectorAll('.origin-top-right:not(.hidden)').forEach(function(element) {
-                        if (element.id !== dropdownId) {
-                            element.classList.add('hidden', 'scale-95', 'opacity-0');
-                            element.classList.remove('scale-100', 'opacity-100');
+                    // Close other dropdowns
+                    document.querySelectorAll('[id$="-dropdown"]').forEach(dd => {
+                        if (dd.id !== dropdownId) {
+                            dd.classList.add('hidden');
                         }
                     });
 
-                    // Toggle this dropdown with animation
-                    const isHidden = dropdown.classList.contains('hidden');
-
-                    if (isHidden) {
-                        dropdown.classList.remove('hidden');
-                        // Force a reflow to ensure the transition happens
-                        void dropdown.offsetWidth;
-                        dropdown.classList.remove('scale-95', 'opacity-0');
-                        dropdown.classList.add('scale-100', 'opacity-100');
-                    } else {
-                        dropdown.classList.remove('scale-100', 'opacity-100');
-                        dropdown.classList.add('scale-95', 'opacity-0');
-
-                        // After transition completes, hide the element
-                        setTimeout(() => {
-                            dropdown.classList.add('hidden');
-                        }, 200); // Match the duration in the CSS
-                    }
+                    // Toggle current dropdown
+                    dropdown.classList.toggle('hidden');
                 });
 
-                // Close dropdown when clicking elsewhere on the page
+                // Close when clicking outside
                 document.addEventListener('click', function(e) {
                     if (!dropdown.contains(e.target) && !button.contains(e.target)) {
-                        dropdown.classList.remove('scale-100', 'opacity-100');
-                        dropdown.classList.add('scale-95', 'opacity-0');
-
-                        setTimeout(() => {
-                            dropdown.classList.add('hidden');
-                        }, 200);
+                        dropdown.classList.add('hidden');
                     }
                 });
             }
 
-            // Setup both dropdowns
-            setupDropdown('notifications-button', 'notifications-dropdown');
-            setupDropdown('user-menu-button', 'user-dropdown');
-
-            // Helper function for notification time formatting (you'll need to implement this)
-            function time_elapsed_string(datetime) {
-                // This is just a placeholder - implement proper time formatting logic here
-                return "Just now";
-            }
+            // Initialize dropdowns
+            toggleDropdown('notifications-button', 'notifications-dropdown');
+            toggleDropdown('user-menu-button', 'user-dropdown');
         });
+
+        // Helper function for notification time
+        function time_elapsed_string(datetime) {
+            // Implement your time formatting logic here
+            return "Just now";
+        }
     </script>
 
+    <!-- Sidebar and main content -->
     <div class="flex">
         <!-- Sidebar -->
         <div class="hidden md:flex md:flex-shrink-0">
-            <div class="flex flex-col w-64 bg-white border-r border-gray-200">
-                <div class="h-0 flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-                    <nav class="flex-1 px-2 space-y-1">
-                        <a href="dashboard.php" class="<?= basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'bg-maroon-50 text-maroon-900 border-l-4 border-maroon-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-2 py-2 text-sm font-medium rounded-md">
-                            <i class="fas fa-tachometer-alt <?= basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'text-maroon-600' : 'text-gray-400 group-hover:text-gray-500' ?> mr-3"></i>
+            <div class="flex flex-col w-64 border-r border-gray-200 bg-white">
+                <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
+                    <nav class="flex-1 px-3 space-y-1">
+                        <a href="dashboard.php" class="<?= basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'bg-maroon-50 text-maroon-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors">
+                            <i class="<?= basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'fas fa-tachometer-alt text-maroon-600' : 'fas fa-tachometer-alt text-gray-400 group-hover:text-gray-500' ?> mr-3 w-5 text-center"></i>
                             Dashboard
                         </a>
-                        <a href="book_room.php" class="<?= basename($_SERVER['PHP_SELF']) == 'book_room.php' ? 'bg-maroon-50 text-maroon-900 border-l-4 border-maroon-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-2 py-2 text-sm font-medium rounded-md">
-                            <i class="fas fa-plus-circle <?= basename($_SERVER['PHP_SELF']) == 'book_room.php' ? 'text-maroon-600' : 'text-gray-400 group-hover:text-gray-500' ?> mr-3"></i>
+                        <a href="book_room.php" class="<?= basename($_SERVER['PHP_SELF']) == 'book_room.php' ? 'bg-maroon-50 text-maroon-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors">
+                            <i class="<?= basename($_SERVER['PHP_SELF']) == 'book_room.php' ? 'fas fa-plus-circle text-maroon-600' : 'fas fa-plus-circle text-gray-400 group-hover:text-gray-500' ?> mr-3 w-5 text-center"></i>
                             Book a Room
                         </a>
-                        <a href="rooms.php" class="<?= basename($_SERVER['PHP_SELF']) == 'rooms.php' ? 'bg-maroon-50 text-maroon-900 border-l-4 border-maroon-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-2 py-2 text-sm font-medium rounded-md">
-                            <i class="fas fa-door-open <?= basename($_SERVER['PHP_SELF']) == 'rooms.php' ? 'text-maroon-600' : 'text-gray-400 group-hover:text-gray-500' ?> mr-3"></i>
+                        <a href="rooms.php" class="<?= basename($_SERVER['PHP_SELF']) == 'rooms.php' ? 'bg-maroon-50 text-maroon-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors">
+                            <i class="<?= basename($_SERVER['PHP_SELF']) == 'rooms.php' ? 'fas fa-door-open text-maroon-600' : 'fas fa-door-open text-gray-400 group-hover:text-gray-500' ?> mr-3 w-5 text-center"></i>
                             View Rooms
                         </a>
-                        <!-- <a href="calendar.php" class="<?= basename($_SERVER['PHP_SELF']) == 'calendar.php' ? 'bg-maroon-50 text-maroon-900 border-l-4 border-maroon-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-2 py-2 text-sm font-medium rounded-md">
-                            <i class="fas fa-calendar-week <?= basename($_SERVER['PHP_SELF']) == 'calendar.php' ? 'text-maroon-600' : 'text-gray-400 group-hover:text-gray-500' ?> mr-3"></i>
-                            Calendar View
-                        </a> -->
-                        <a href="meetings.php" class="<?= basename($_SERVER['PHP_SELF']) == 'meetings.php' ? 'bg-maroon-50 text-maroon-900 border-l-4 border-maroon-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-2 py-2 text-sm font-medium rounded-md">
-                            <i class="fas fa-users <?= basename($_SERVER['PHP_SELF']) == 'meetings.php' ? 'text-maroon-600' : 'text-gray-400 group-hover:text-gray-500' ?> mr-3"></i>
+                        <a href="meetings.php" class="<?= basename($_SERVER['PHP_SELF']) == 'meetings.php' ? 'bg-maroon-50 text-maroon-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors">
+                            <i class="<?= basename($_SERVER['PHP_SELF']) == 'meetings.php' ? 'fas fa-users text-maroon-600' : 'fas fa-users text-gray-400 group-hover:text-gray-500' ?> mr-3 w-5 text-center"></i>
                             All Meetings
                         </a>
                         <?php if ($isLoggedIn && in_array($userRole, ['approver', 'admin'])): ?>
-                            <a href="approvals.php" class="<?= basename($_SERVER['PHP_SELF']) == 'approvals.php' ? 'bg-maroon-50 text-maroon-900 border-l-4 border-maroon-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-2 py-2 text-sm font-medium rounded-md">
-                                <i class="fas fa-check-square <?= basename($_SERVER['PHP_SELF']) == 'approvals.php' ? 'text-maroon-600' : 'text-gray-400 group-hover:text-gray-500' ?> mr-3"></i>
+                            <a href="approvals.php" class="<?= basename($_SERVER['PHP_SELF']) == 'approvals.php' ? 'bg-maroon-50 text-maroon-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors">
+                                <i class="<?= basename($_SERVER['PHP_SELF']) == 'approvals.php' ? 'fas fa-check-square text-maroon-600' : 'fas fa-check-square text-gray-400 group-hover:text-gray-500' ?> mr-3 w-5 text-center"></i>
                                 Approve Bookings
                             </a>
                         <?php endif; ?>
                         <?php if ($isLoggedIn && $userRole === 'admin'): ?>
-                            <a href="manage_rooms.php" class="<?= basename($_SERVER['PHP_SELF']) == 'manage_rooms.php' ? 'bg-maroon-50 text-maroon-900 border-l-4 border-maroon-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-2 py-2 text-sm font-medium rounded-md">
-                                <i class="fas fa-cog <?= basename($_SERVER['PHP_SELF']) == 'manage_rooms.php' ? 'text-maroon-600' : 'text-gray-400 group-hover:text-gray-500' ?> mr-3"></i>
+                            <div class="px-3 pt-4">
+                                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin</h3>
+                            </div>
+                            <a href="manage_rooms.php" class="<?= basename($_SERVER['PHP_SELF']) == 'manage_rooms.php' ? 'bg-maroon-50 text-maroon-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors">
+                                <i class="<?= basename($_SERVER['PHP_SELF']) == 'manage_rooms.php' ? 'fas fa-cog text-maroon-600' : 'fas fa-cog text-gray-400 group-hover:text-gray-500' ?> mr-3 w-5 text-center"></i>
                                 Manage Rooms
                             </a>
-                            <a href="manage_users.php" class="<?= basename($_SERVER['PHP_SELF']) == 'manage_users.php' ? 'bg-maroon-50 text-maroon-900 border-l-4 border-maroon-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-2 py-2 text-sm font-medium rounded-md">
-                                <i class="fas fa-users-cog <?= basename($_SERVER['PHP_SELF']) == 'manage_users.php' ? 'text-maroon-600' : 'text-gray-400 group-hover:text-gray-500' ?> mr-3"></i>
+                            <a href="manage_users.php" class="<?= basename($_SERVER['PHP_SELF']) == 'manage_users.php' ? 'bg-maroon-50 text-maroon-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors">
+                                <i class="<?= basename($_SERVER['PHP_SELF']) == 'manage_users.php' ? 'fas fa-users-cog text-maroon-600' : 'fas fa-users-cog text-gray-400 group-hover:text-gray-500' ?> mr-3 w-5 text-center"></i>
                                 Manage Users
                             </a>
-                            <a href="manage_users.php" class="<?= basename($_SERVER['PHP_SELF']) == 'manage_departments.php' ? 'bg-maroon-50 text-maroon-900 border-l-4 border-maroon-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-2 py-2 text-sm font-medium rounded-md">
-                                <i class="fas fa-users-cog <?= basename($_SERVER['PHP_SELF']) == 'manage_departments.php' ? 'text-maroon-600' : 'text-gray-400 group-hover:text-gray-500' ?> mr-3"></i>
+                            <a href="manage_departments.php" class="<?= basename($_SERVER['PHP_SELF']) == 'manage_departments.php' ? 'bg-maroon-50 text-maroon-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors">
+                                <i class="<?= basename($_SERVER['PHP_SELF']) == 'manage_departments.php' ? 'fas fa-sitemap text-maroon-600' : 'fas fa-sitemap text-gray-400 group-hover:text-gray-500' ?> mr-3 w-5 text-center"></i>
                                 Manage Departments
                             </a>
-                            <a href="reports.php" class="<?= basename($_SERVER['PHP_SELF']) == 'reports.php' ? 'bg-maroon-50 text-maroon-900 border-l-4 border-maroon-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-2 py-2 text-sm font-medium rounded-md">
-                                <i class="fas fa-chart-bar <?= basename($_SERVER['PHP_SELF']) == 'reports.php' ? 'text-maroon-600' : 'text-gray-400 group-hover:text-gray-500' ?> mr-3"></i>
+                            <a href="reports.php" class="<?= basename($_SERVER['PHP_SELF']) == 'reports.php' ? 'bg-maroon-50 text-maroon-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors">
+                                <i class="<?= basename($_SERVER['PHP_SELF']) == 'reports.php' ? 'fas fa-chart-bar text-maroon-600' : 'fas fa-chart-bar text-gray-400 group-hover:text-gray-500' ?> mr-3 w-5 text-center"></i>
                                 Reports
                             </a>
                         <?php endif; ?>
                     </nav>
 
-                    <div class="px-4 mt-8">
-                        <h3 class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Quick Actions</h3>
-                        <div class="mt-1 space-y-1">
-                            <a href="book_room.php?quick=1" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-md hover:text-gray-900 hover:bg-gray-50">
-                                <i class="fas fa-bolt text-gray-400 group-hover:text-gray-500 mr-3"></i>
-                                Quick Book
-                            </a>
-                            <a href="find_room.php" class="group flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-md hover:text-gray-900 hover:bg-gray-50">
-                                <i class="fas fa-search text-gray-400 group-hover:text-gray-500 mr-3"></i>
-                                Find Available Room
-                            </a>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
-
         <!-- Main content -->
         <div class="flex-1 overflow-auto">
             <main class="py-6 px-4 sm:px-6 lg:px-8">

@@ -118,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ($status === 'Pending' ?
                     "An administrator will review your request shortly." :
                     "Your booking has been automatically approved.") . "\n\n" .
-                "You can view your booking at: " . getSiteUrl() . "/booking_details.php?id={$bookingId}"
+                "You can view your booking at: " . getSiteUrl() . "/booking_success.php?id={$bookingId}"
         );
 
         // Email to admins if pending

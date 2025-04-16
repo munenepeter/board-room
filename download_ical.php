@@ -1,5 +1,5 @@
 <?php
-require_once 'db.php';
+require_once 'database/db.php';
 
 // Check if booking ID is provided
 if (!isset($_GET['id'])) {

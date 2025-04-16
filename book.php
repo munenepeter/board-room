@@ -1,6 +1,6 @@
 <?php
 // book.php - Handle room booking
-require_once 'db.php';
+require_once 'database/db.php';
 require_once 'includes/auth.php';
 
 if (!isLoggedIn()) {
