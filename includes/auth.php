@@ -9,7 +9,6 @@ function isLoggedIn() {
 
 // Function to log in a user
 function login($email, $password) {
-    print_r($email);
 
     global $db;
     
@@ -18,10 +17,6 @@ function login($email, $password) {
     $stmt->bindValue(':email', $email, PDO::PARAM_STR);
     $stmt->execute();
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    print_r($user);
-
-    print_r(password_hash($password, PASSWORD_DEFAULT));
 
     // Verify user exists and check password
     if ($user && password_verify($password, $user['password'])) {

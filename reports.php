@@ -106,7 +106,7 @@ function getUserActivityReport($startDate, $endDate) {
         LEFT JOIN departments d ON u.department_id = d.department_id
         GROUP BY u.user_id
         ORDER BY bookings_made DESC
-        LIMIT 10
+        LIMIT 5
     ");
     $stmt->execute([
         ':start_date' => $startDate . ' 00:00:00',
@@ -234,7 +234,7 @@ function getUserActivityReport($startDate, $endDate) {
                                         <dt class="text-sm font-medium text-gray-500 truncate">Avg Duration</dt>
                                         <dd class="flex items-baseline">
                                             <div class="text-2xl font-semibold text-gray-900">
-                                                <?= $reportData['booking_stats']['avg_duration'] ?? 0 ?> hrs
+                                                <?= round($reportData['booking_stats']['avg_duration'] ?? 0) ?> hrs
                                             </div>
                                         </dd>
                                     </dl>

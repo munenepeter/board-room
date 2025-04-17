@@ -48,7 +48,7 @@ $other_bookings->execute();
 $otherBookings = $other_bookings->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!-- Approval Modal -->
-<div id="approvalModal" class="fixed inset-0 z-10 hidden overflow-y-auto" aria-hidden="true">
+<div id="approvalModal" class="fixed inset-0 top-50 z-10 hidden overflow-y-auto" aria-hidden="true">
     <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <!-- Background overlay -->
         <div class="fixed inset-0 transition-opacity" aria-hidden="true">
@@ -87,7 +87,7 @@ $otherBookings = $other_bookings->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <!-- Rejection Modal -->
-<div id="rejectionModal" class="fixed inset-0 z-10 hidden overflow-y-auto" aria-hidden="true">
+<div id="rejectionModal" class="fixed inset-0  z-10 hidden overflow-y-auto" aria-hidden="true">
     <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <!-- Background overlay -->
         <div class="fixed inset-0 transition-opacity" aria-hidden="true">
@@ -120,6 +120,37 @@ $otherBookings = $other_bookings->fetchAll(PDO::FETCH_ASSOC);
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Details Modal -->
+<div id="detailsModal" class="fixed inset-0 z-10 hidden overflow-y-auto" aria-hidden="true">
+    <div class="flex items-center justify-center min-h-screen p-4 pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Background overlay -->
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+
+        <!-- Modal panel -->
+        <div class="relative bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg w-full mx-auto">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="flex justify-between items-center pb-3 border-b border-gray-200">
+                    <h5 id="detailsModalTitle" class="text-lg font-medium text-gray-900">Booking Details</h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-500 focus:outline-none" aria-label="Close">
+                        <span aria-hidden="true" class="text-2xl">&times;</span>
+                    </button>
+                </div>
+                <div id="detailsModalBody" class="mt-3">
+                    <!-- Content will be loaded via AJAX -->
+                </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button aria-label="Close" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-maroon-500 sm:mt-0 sm:w-auto sm:text-sm">
+                    Close
+                </button>
             </div>
         </div>
     </div>
@@ -398,7 +429,7 @@ $otherBookings = $other_bookings->fetchAll(PDO::FETCH_ASSOC);
         showModal('detailsModal');
 
         $.ajax({
-            url: 'ajax/get_booking_success.php',
+            url: 'ajax/get_booking_details.php',
             type: 'GET',
             data: {
                 id: bookingId
@@ -424,7 +455,7 @@ $otherBookings = $other_bookings->fetchAll(PDO::FETCH_ASSOC);
             data: formData,
             success: function(response) {
                 hideModal('approvalModal');
-                // location.reload(); // Refresh to show updated status
+                location.reload(); // Refresh to show updated status
             },
             error: function() {
                 alert('Failed to approve booking. Please try again.');
@@ -443,7 +474,7 @@ $otherBookings = $other_bookings->fetchAll(PDO::FETCH_ASSOC);
             data: formData,
             success: function(response) {
                 hideModal('rejectionModal');
-                // location.reload(); // Refresh to show updated status
+                location.reload(); // Refresh to show updated status
             },
             error: function() {
                 alert('Failed to reject booking. Please try again.');

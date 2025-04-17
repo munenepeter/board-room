@@ -133,6 +133,8 @@ function time_elapsed_string($datetime, $full = false) {
             box-shadow: 0 0 0 2px #800000;
         }
     </style>
+    <script src="assets/js/jquery360.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
 <body class="bg-gray-50 antialiased">
@@ -170,11 +172,6 @@ function time_elapsed_string($datetime, $full = false) {
                                 <i class="fas fa-check-circle mr-1"></i> Approvals
                             </a>
                         <?php endif; ?>
-                        <?php if ($isLoggedIn && $userRole === 'admin'): ?>
-                            <a href="admin.php" class="px-3 py-2 rounded-md text-sm font-medium text-gray-200 hover:text-white hover:bg-maroon-800 transition-colors">
-                                <i class="fas fa-cog mr-1"></i> Admin
-                            </a>
-                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -198,9 +195,9 @@ function time_elapsed_string($datetime, $full = false) {
                                 <div class="py-1">
                                     <div class="flex items-center justify-between px-4 py-2 bg-gray-50 rounded-t-lg">
                                         <h3 class="text-sm font-medium text-gray-700">Notifications</h3>
-                                        <?php if ($unreadNotifications > 0): ?>
+                                        <!-- <?php if ($unreadNotifications > 0): ?>
                                             <a href="mark_all_read.php" class="text-xs text-maroon-600 hover:text-maroon-800">Mark all as read</a>
-                                        <?php endif; ?>
+                                        <?php endif; ?> -->
                                     </div>
                                     <div class="max-h-96 overflow-y-auto">
                                         <?php
@@ -280,11 +277,6 @@ function time_elapsed_string($datetime, $full = false) {
                 <?php if ($isLoggedIn && in_array($userRole, ['approver', 'admin'])): ?>
                     <a href="approvals.php" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-maroon-700 transition-colors">
                         <i class="fas fa-check-circle mr-2"></i> Approvals
-                    </a>
-                <?php endif; ?>
-                <?php if ($isLoggedIn && $userRole === 'admin'): ?>
-                    <a href="admin.php" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-maroon-700 transition-colors">
-                        <i class="fas fa-cog mr-2"></i> Admin
                     </a>
                 <?php endif; ?>
             </div>
@@ -420,10 +412,10 @@ function time_elapsed_string($datetime, $full = false) {
                                 <i class="<?= basename($_SERVER['PHP_SELF']) == 'manage_users.php' ? 'fas fa-users-cog text-maroon-600' : 'fas fa-users-cog text-gray-400 group-hover:text-gray-500' ?> mr-3 w-5 text-center"></i>
                                 Manage Users
                             </a>
-                            <a href="manage_departments.php" class="<?= basename($_SERVER['PHP_SELF']) == 'manage_departments.php' ? 'bg-maroon-50 text-maroon-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors">
+                            <!-- <a href="manage_departments.php" class="<?= basename($_SERVER['PHP_SELF']) == 'manage_departments.php' ? 'bg-maroon-50 text-maroon-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors">
                                 <i class="<?= basename($_SERVER['PHP_SELF']) == 'manage_departments.php' ? 'fas fa-sitemap text-maroon-600' : 'fas fa-sitemap text-gray-400 group-hover:text-gray-500' ?> mr-3 w-5 text-center"></i>
                                 Manage Departments
-                            </a>
+                            </a> -->
                             <a href="reports.php" class="<?= basename($_SERVER['PHP_SELF']) == 'reports.php' ? 'bg-maroon-50 text-maroon-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors">
                                 <i class="<?= basename($_SERVER['PHP_SELF']) == 'reports.php' ? 'fas fa-chart-bar text-maroon-600' : 'fas fa-chart-bar text-gray-400 group-hover:text-gray-500' ?> mr-3 w-5 text-center"></i>
                                 Reports
@@ -436,5 +428,5 @@ function time_elapsed_string($datetime, $full = false) {
         </div>
         <!-- Main content -->
         <div class="flex-1 overflow-auto">
-            <main class="py-6 px-4 sm:px-6 lg:px-8">
+            <main class="px-4 sm:px-6 lg:px-8">
                 <div class="max-w-7xl mx-auto">

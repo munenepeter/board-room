@@ -122,7 +122,7 @@ $meetings = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
 
         <!-- Modal panel -->
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+        <div class="mt-48 inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
             <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div class="flex justify-between items-center pb-3 border-b border-gray-200">
                     <h5 id="detailsModalTitle" class="text-lg font-medium text-gray-900">Booking Details</h5>

@@ -17,7 +17,6 @@ if (isset($_POST['delete_room'])) {
         $stmt->execute([$roomId]);
         
         $_SESSION['success_message'] = "Room has been deleted successfully.";
-        header("Location: manage_rooms.php");
         exit;
     }
 }
@@ -167,9 +166,9 @@ $rooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex justify-end space-x-2">
-                                        <a href="edit_room.php?id=<?= $room['room_id'] ?>" class="text-maroon-600 hover:text-maroon-900">
+                                        <!-- <a href="edit_room.php?id=<?= $room['room_id'] ?>" class="text-maroon-600 hover:text-maroon-900">
                                             <i class="fas fa-edit"></i>
-                                        </a>
+                                        </a> -->
                                         <?php if ($room['is_active']): ?>
                                         <form method="post" class="inline" onsubmit="return confirm('Are you sure you want to deactivate this room? Existing bookings will not be affected.');">
                                             <input type="hidden" name="room_id" value="<?= $room['room_id'] ?>">
