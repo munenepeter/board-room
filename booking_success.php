@@ -17,9 +17,9 @@ $stmt = $db->prepare("
     SELECT b.*, r.room_name, r.location 
     FROM bookings b
     JOIN boardrooms r ON b.room_id = r.room_id
-    WHERE b.booking_id = ? AND b.user_id = ?
+    WHERE b.booking_id = ?
 ");
-$stmt->execute([$bookingId, $userId]);
+$stmt->execute([$bookingId]);
 $booking = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$booking) {

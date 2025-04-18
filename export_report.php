@@ -5,7 +5,7 @@
 //     exit;
 // }
 
-include 'db.php';
+require_once 'database/db.php';
 
 // Set headers for CSV download
 header('Content-Type: text/csv; charset=utf-8');
