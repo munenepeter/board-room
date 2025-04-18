@@ -172,6 +172,11 @@ function time_elapsed_string($datetime, $full = false) {
                                 <i class="fas fa-check-circle mr-1"></i> Approvals
                             </a>
                         <?php endif; ?>
+                        <?php if ($isLoggedIn && $userRole === 'admin'): ?>
+                            <a href="admin.php" class="px-3 py-2 rounded-md text-sm font-medium text-gray-200 hover:text-white hover:bg-maroon-800 transition-colors">
+                                <i class="fas fa-cog mr-1"></i> Admin
+                            </a>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -277,6 +282,11 @@ function time_elapsed_string($datetime, $full = false) {
                 <?php if ($isLoggedIn && in_array($userRole, ['approver', 'admin'])): ?>
                     <a href="approvals.php" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-maroon-700 transition-colors">
                         <i class="fas fa-check-circle mr-2"></i> Approvals
+                    </a>
+                <?php endif; ?>
+                <?php if ($isLoggedIn && $userRole === 'admin'): ?>
+                    <a href="admin.php" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-maroon-700 transition-colors">
+                        <i class="fas fa-cog mr-2"></i> Admin
                     </a>
                 <?php endif; ?>
             </div>
@@ -412,10 +422,10 @@ function time_elapsed_string($datetime, $full = false) {
                                 <i class="<?= basename($_SERVER['PHP_SELF']) == 'manage_users.php' ? 'fas fa-users-cog text-maroon-600' : 'fas fa-users-cog text-gray-400 group-hover:text-gray-500' ?> mr-3 w-5 text-center"></i>
                                 Manage Users
                             </a>
-                            <!-- <a href="manage_departments.php" class="<?= basename($_SERVER['PHP_SELF']) == 'manage_departments.php' ? 'bg-maroon-50 text-maroon-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors">
+                            <a href="manage_departments.php" class="<?= basename($_SERVER['PHP_SELF']) == 'manage_departments.php' ? 'bg-maroon-50 text-maroon-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors">
                                 <i class="<?= basename($_SERVER['PHP_SELF']) == 'manage_departments.php' ? 'fas fa-sitemap text-maroon-600' : 'fas fa-sitemap text-gray-400 group-hover:text-gray-500' ?> mr-3 w-5 text-center"></i>
                                 Manage Departments
-                            </a> -->
+                            </a>
                             <a href="reports.php" class="<?= basename($_SERVER['PHP_SELF']) == 'reports.php' ? 'bg-maroon-50 text-maroon-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors">
                                 <i class="<?= basename($_SERVER['PHP_SELF']) == 'reports.php' ? 'fas fa-chart-bar text-maroon-600' : 'fas fa-chart-bar text-gray-400 group-hover:text-gray-500' ?> mr-3 w-5 text-center"></i>
                                 Reports
@@ -429,4 +439,4 @@ function time_elapsed_string($datetime, $full = false) {
         <!-- Main content -->
         <div class="flex-1 overflow-auto">
             <main class="px-4 sm:px-6 lg:px-8">
-                <div class="max-w-7xl mx-auto">
+                <div class="max-w-7xl mx-auto relative">
