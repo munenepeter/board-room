@@ -66,7 +66,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $db->commit();
 
         $_SESSION['success_message'] = "Room added successfully!";
-        header("Location: manage_rooms.php");
+        if (!headers_sent()) {
+            header("Location: manage_rooms.php");
+        } else {
+            echo "<script>window.location.href = 'manage_rooms.php';</script>";
+        }
         exit;
     } catch (Exception $e) {
         $db->rollBack();

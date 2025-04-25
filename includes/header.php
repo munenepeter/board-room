@@ -167,7 +167,7 @@ function time_elapsed_string($datetime, $full = false) {
                         <a href="bookings.php" class="px-3 py-2 rounded-md text-sm font-medium text-gray-200 hover:text-white hover:bg-maroon-800 transition-colors">
                             <i class="fas fa-calendar-plus mr-1"></i> Bookings
                         </a>
-                        <?php if ($isLoggedIn && in_array($userRole, ['approver', 'admin'])): ?>
+                        <?php if (false && $isLoggedIn && in_array($userRole, ['approver', 'admin'])): ?>
                             <a href="approvals.php" class="px-3 py-2 rounded-md text-sm font-medium text-gray-200 hover:text-white hover:bg-maroon-800 transition-colors">
                                 <i class="fas fa-check-circle mr-1"></i> Approvals
                             </a>
@@ -279,7 +279,7 @@ function time_elapsed_string($datetime, $full = false) {
                 <a href="bookings.php" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-maroon-700 transition-colors">
                     <i class="fas fa-calendar-plus mr-2"></i> Bookings
                 </a>
-                <?php if ($isLoggedIn && in_array($userRole, ['approver', 'admin'])): ?>
+                <?php if (false && $isLoggedIn && in_array($userRole, ['approver', 'admin'])): ?>
                     <a href="approvals.php" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-maroon-700 transition-colors">
                         <i class="fas fa-check-circle mr-2"></i> Approvals
                     </a>
@@ -404,7 +404,7 @@ function time_elapsed_string($datetime, $full = false) {
                             <i class="<?= basename($_SERVER['PHP_SELF']) == 'meetings.php' ? 'fas fa-users text-maroon-600' : 'fas fa-users text-gray-400 group-hover:text-gray-500' ?> mr-3 w-5 text-center"></i>
                             All Meetings
                         </a>
-                        <?php if ($isLoggedIn && in_array($userRole, ['approver', 'admin'])): ?>
+                        <?php if (false && $isLoggedIn && in_array($userRole, ['approver', 'admin'])): ?>
                             <a href="approvals.php" class="<?= basename($_SERVER['PHP_SELF']) == 'approvals.php' ? 'bg-maroon-50 text-maroon-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' ?> group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors">
                                 <i class="<?= basename($_SERVER['PHP_SELF']) == 'approvals.php' ? 'fas fa-check-square text-maroon-600' : 'fas fa-check-square text-gray-400 group-hover:text-gray-500' ?> mr-3 w-5 text-center"></i>
                                 Approve Bookings

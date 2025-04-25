@@ -183,7 +183,7 @@ function getUserActivityReport($startDate, $endDate) {
                                 </div>
                                 <div class="ml-5 w-0 flex-1">
                                     <dl>
-                                        <dt class="text-sm font-medium text-gray-500 truncate">Approved</dt>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Enclosed</dt>
                                         <dd class="flex items-baseline">
                                             <div class="text-2xl font-semibold text-gray-900">
                                                 <?= $reportData['booking_stats']['bookings']['approved'] ?>
@@ -207,14 +207,14 @@ function getUserActivityReport($startDate, $endDate) {
                                 </div>
                                 <div class="ml-5 w-0 flex-1">
                                     <dl>
-                                        <dt class="text-sm font-medium text-gray-500 truncate">Pending</dt>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Cancelled</dt>
                                         <dd class="flex items-baseline">
                                             <div class="text-2xl font-semibold text-gray-900">
-                                                <?= $reportData['booking_stats']['bookings']['pending'] ?>
+                                                <?= $reportData['booking_stats']['bookings']['cancelled'] ?>
                                             </div>
                                             <div class="ml-2 flex items-baseline text-sm font-semibold text-yellow-600">
                                                 <?= $reportData['booking_stats']['bookings']['total_bookings'] > 0 ?
-                                                    round(($reportData['booking_stats']['bookings']['pending'] / $reportData['booking_stats']['bookings']['total_bookings']) * 100) : 0 ?>%
+                                                    round(($reportData['booking_stats']['bookings']['cancelled'] / $reportData['booking_stats']['bookings']['total_bookings']) * 100) : 0 ?>%
                                             </div>
                                         </dd>
                                     </dl>

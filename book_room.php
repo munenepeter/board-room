@@ -1,6 +1,8 @@
 <?php
 require_once 'includes/header.php';
 
+$selected_room_id = isset($_GET['room_id']) ? $_GET['room_id'] : null;
+
 // Check if user is logged in
 if (!$isLoggedIn) {
     header("Location: login.php");
@@ -9,6 +11,7 @@ if (!$isLoggedIn) {
 
 // Get all active rooms for dropdown
 $rooms = $db->query("SELECT room_id, room_name, capacity, location FROM boardrooms WHERE is_active = 1 ORDER BY room_name");
+
 
 // Process form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -49,7 +52,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 :attendees_count, :status, datetime('now')
             )
         ");
-        $status = ($userRole === 'admin') ? 'Approved' : 'Pending';
+
+        // fucking supervsior so this as redundant
+        // and said approvals should be removed
+        // $status = ($userRole === 'admin') ? 'Approved' : 'Pending';
+
+        $status = 'Approved';
         $stmt->execute([
             ':room_id' => $roomId,
             ':user_id' => $userId,
@@ -163,7 +171,7 @@ $defaultEnd = (new DateTime('+2 hours'))->format('Y-m-d\TH:i');
 ?>
 
 <main class="py-6 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-3xl mx-auto">
+    <div class="max-w-5xl mx-auto">
         <div class="bg-white shadow rounded-lg p-6">
             <h1 class="text-2xl font-bold text-maroon-800 mb-6">Book a Meeting Room</h1>
 
@@ -195,7 +203,8 @@ $defaultEnd = (new DateTime('+2 hours'))->format('Y-m-d\TH:i');
                             <div class="sm:col-span-3">
                                 <label for="attendees_count" class="block text-sm font-medium text-gray-700">Number of Attendees *</label>
                                 <input type="number" name="attendees_count" id="attendees_count" min="1" required
-                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-maroon-500 focus:border-maroon-500 sm:text-sm">
+                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-maroon-500 focus:border-maroon-500 sm:text-sm"
+                                    oninput="checkCapacity()">
                             </div>
 
                             <div class="sm:col-span-3">
@@ -204,7 +213,7 @@ $defaultEnd = (new DateTime('+2 hours'))->format('Y-m-d\TH:i');
                                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-maroon-500 focus:border-maroon-500 sm:text-sm">
                                     <option value="">Select a room</option>
                                     <?php while ($room = $rooms->fetch(PDO::FETCH_ASSOC)): ?>
-                                        <option value="<?= $room['room_id'] ?>"
+                                        <option <?= !is_null($selected_room_id) && $selected_room_id == $room['room_id'] ? 'selected' : '' ?> value="<?= $room['room_id'] ?>"
                                             data-capacity="<?= $room['capacity'] ?>">
                                             <?= htmlspecialchars($room['room_name']) ?> (Capacity: <?= $room['capacity'] ?>, <?= htmlspecialchars($room['location']) ?>)
                                         </option>
