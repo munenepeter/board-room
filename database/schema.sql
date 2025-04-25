@@ -1,24 +1,25 @@
--- Table: Users (replaces Employees)
-CREATE TABLE users (
-    user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    email TEXT NOT NULL UNIQUE,
-    password TEXT NOT NULL, -- For login authentication
-    department_id INTEGER NOT NULL,
-    role TEXT DEFAULT 'user', -- 'user', 'approver', or 'admin'
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (department_id) REFERENCES departments(department_id)
-);
+-- --------------------------------------------------------
+-- Host:                         C:\Users\Peter\laragon\www\board-room\database\dbv2.sqlite
+-- Server version:               3.39.0
+-- Server OS:                    
+-- HeidiSQL Version:             12.1.0.6537
+-- --------------------------------------------------------
 
--- Table: Departments
-CREATE TABLE departments (
-    department_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    department_name TEXT NOT NULL UNIQUE
-);
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET NAMES  */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
--- Table: BoardRooms (enhanced with more details)
-CREATE TABLE boardrooms (
+
+-- Dumping database structure for dbv2
+CREATE DATABASE IF NOT EXISTS "dbv2";
+;
+
+-- Dumping structure for table dbv2.boardrooms
+CREATE TABLE IF NOT EXISTS boardrooms (
     room_id INTEGER PRIMARY KEY AUTOINCREMENT,
     room_name TEXT NOT NULL UNIQUE,
     capacity INTEGER NOT NULL,
@@ -28,8 +29,10 @@ CREATE TABLE boardrooms (
     thumbnail_url TEXT -- URL for room image
 );
 
--- Table: Bookings (enhanced with approval workflow)
-CREATE TABLE bookings (
+-- Data exporting was unselected.
+
+-- Dumping structure for table dbv2.bookings
+CREATE TABLE IF NOT EXISTS bookings (
     booking_id INTEGER PRIMARY KEY AUTOINCREMENT,
     room_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
@@ -47,8 +50,10 @@ CREATE TABLE bookings (
     FOREIGN KEY (approver_id) REFERENCES users(user_id)
 );
 
--- Table: Events (renamed to BookingDetails for clarity)
-CREATE TABLE booking_details (
+-- Data exporting was unselected.
+
+-- Dumping structure for table dbv2.booking_details
+CREATE TABLE IF NOT EXISTS booking_details (
     detail_id INTEGER PRIMARY KEY AUTOINCREMENT,
     booking_id INTEGER NOT NULL,
     description TEXT,
@@ -56,8 +61,31 @@ CREATE TABLE booking_details (
     FOREIGN KEY (booking_id) REFERENCES bookings(booking_id)
 );
 
--- Table: Notifications
-CREATE TABLE notifications (
+-- Data exporting was unselected.
+
+-- Dumping structure for table dbv2.calendar_sync
+CREATE TABLE IF NOT EXISTS calendar_sync (
+    sync_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    provider TEXT NOT NULL, -- 'google', 'outlook', etc.
+    access_token TEXT NOT NULL,
+    refresh_token TEXT,
+    expiry_date DATETIME,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+-- Data exporting was unselected.
+
+-- Dumping structure for table dbv2.departments
+CREATE TABLE IF NOT EXISTS departments (
+    department_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    department_name TEXT NOT NULL UNIQUE
+);
+
+-- Data exporting was unselected.
+
+-- Dumping structure for table dbv2.notifications
+CREATE TABLE IF NOT EXISTS notifications (
     notification_id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     title TEXT NOT NULL,
@@ -69,19 +97,20 @@ CREATE TABLE notifications (
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
--- Table: CalendarSync (for users who want to sync with external calendars)
-CREATE TABLE calendar_sync (
-    sync_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    provider TEXT NOT NULL, -- 'google', 'outlook', etc.
-    access_token TEXT NOT NULL,
-    refresh_token TEXT,
-    expiry_date DATETIME,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+-- Data exporting was unselected.
+
+-- Dumping structure for table dbv2.reports
+CREATE TABLE IF NOT EXISTS reports (
+    report_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    report_name TEXT NOT NULL,
+    report_description TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Table: RoomSuggestions (logs suggestions for analytics)
-CREATE TABLE room_suggestions (
+-- Data exporting was unselected.
+
+-- Dumping structure for table dbv2.room_suggestions
+CREATE TABLE IF NOT EXISTS room_suggestions (
     suggestion_id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     attendees_count INTEGER NOT NULL,
@@ -94,15 +123,25 @@ CREATE TABLE room_suggestions (
     FOREIGN KEY (suggested_room_id) REFERENCES boardrooms(room_id)
 );
 
--- Table: Reports
-CREATE TABLE reports (
-    report_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    report_name TEXT NOT NULL,
-    report_description TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+-- Data exporting was unselected.
+
+-- Dumping structure for table dbv2.users
+CREATE TABLE IF NOT EXISTS users (
+    user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL, -- For login authentication
+    department_id INTEGER NOT NULL,
+    role TEXT DEFAULT 'user', -- 'user', 'approver', or 'admin'
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (department_id) REFERENCES departments(department_id)
 );
 
--- Create indexes for performance
-CREATE INDEX idx_bookings_room_time ON bookings(room_id, start_time, end_time);
-CREATE INDEX idx_bookings_user ON bookings(user_id);
-CREATE INDEX idx_notifications_user ON notifications(user_id);
+-- Data exporting was unselected.
+
+/*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
+/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
+/*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40111 SET SQL_NOTES=IFNULL(@OLD_SQL_NOTES, 1) */;

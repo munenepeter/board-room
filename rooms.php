@@ -127,9 +127,9 @@ $rooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <a href="book_room.php?room_id=<?= $room['room_id'] ?>" class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-maroon-600 hover:bg-maroon-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-maroon-500">
                                     Book Now
                                 </a>
-                                <a href="room_details.php?id=<?= $room['room_id'] ?>" class="inline-flex items-center px-3 py-1 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-maroon-500">
+                                <!-- <a href="room_details.php?id=<?= $room['room_id'] ?>" class="inline-flex items-center px-3 py-1 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-maroon-500">
                                     Details
-                                </a>
+                                </a> -->
                             </div>
                         </div>
                     </div>
